@@ -1,0 +1,1288 @@
+---
+title: "Simulation of networks"
+author: ""
+format: pdf
+editor: visual
+root.dir: ""
+---
+
+```{r}
+#| label: settings
+#| echo: false
+library(knitr)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.width=8, fig.height=8, fig.show='hold', cache=TRUE, tidy=F, tidy.opts=list(width.cutoff=60), size="small")
+```
+
+```{r}
+#| label: simulation_paper_library
+#| warning: false
+library(statnet)
+library(dplyr)
+library(metafor)
+library(ncf)
+library(proxy)
+library(lqmm)
+library(psychometric)
+library(plotrix)
+```
+
+# 1. Pre
+
+True effect size will be 0 unless stated otherwise.
+
+# 2. Network
+
+## 2.1. Parameters
+
+```{r}
+#| label: simulation_parameters
+n_paper <- 400
+n_cluster <- 8
+n_singles <- .4 * n_paper
+# number of isolates
+cluster_density <- .3
+# likelihood for any two vertices in a cluster to be connected directly
+cluster_size_evenness <- .9
+# shannon evenness for cluster sizes
+bias_origin <- "random" 
+# choose one of: "central", "marginal", "random"
+# central: vertice with most edges, marginal: vertice with least edges
+bias_size <- 5
+# sets sd of normal distribution from which the effect sizes of bias_origins are
+#   drawn
+bias_type <- "individual"
+# choose one of: "cluster", "individual"
+# cluster: the mean of the normal distribution from which the effect sizes are
+#     drawn is the same for the whole cluster
+# individual: assumes only bias_origin is biased, all other clique members draw
+#     their effect sizes from N(homophily * geodesic distsance * bias, cluster_sd)
+homophily <- .7
+cluster_sd <- 1
+single_sd <- 3
+```
+
+## 2.2 Simulation
+
+```{r}
+#| label: simulation_paper_base
+# 42 seed for network analysed in thesis (check parameters above)
+set.seed(42)
+paper <- data.frame("study_id" = as.character(1:n_paper),
+                    "cluster" = c(rep(1:n_cluster, 2),
+                                  sample(as.factor(1:n_cluster), n_paper -
+                                           n_singles - n_cluster * 2, replace = T,
+            prob = abs(sample(rnorm(n_cluster, 100, 100 -
+                                      cluster_size_evenness * 100), n_cluster))^7),
+            seq(n_cluster + 1, length.out = n_singles))) # prob = ...^7, because
+#that gives fairly consistent results,
+# see replication chunk and plot for details
+grid <- expand.grid(1:n_paper, 1:n_paper)
+grid$overlap <- ifelse(paper$cluster[grid$Var1] == paper$cluster[grid$Var2], 1, 0)
+grid$overlap[grid$overlap == 1] <- unlist(lapply(grid$overlap[grid$overlap == 1],
+  function(x)
+    ifelse(runif(1, 0, 100) < (cluster_density / 2 * 100), 1, 0)))
+#cluster_density / 2, because each combination is in grid twice, e.g. 1, 2 and 2, 1
+shared_authors <- matrix(data = grid$overlap, nrow = n_paper, ncol = n_paper, byrow = T)
+colnames(shared_authors) <- 1:n_paper
+net <- as.network(shared_authors, directed = F)
+paper$degree <- jitter(sna::degree(net, gmode = "graph"))
+geo.dist <- geodist(net)
+if(bias_origin == "central"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == max(degree),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "marginal"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == min(degree[degree > .5]),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "random"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & study_id == max(study_id),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else{print("error, check spelling of bias_origin")}
+bias_origin_vertices <- which(!is.na(paper$effect))
+if(any(paper[bias_origin_vertices, "degree"] < .5))
+  {print("error, bias origin not part of its cluster. run simulation again or change parameters")} else{
+paper <- paper %>% group_by(cluster) %>% mutate("gdist_to_bias_origin" =
+         ifelse(cluster <= n_cluster, geo.dist$gdist[as.numeric(study_id),
+                              as.numeric(study_id[which(!is.na(effect))])], NA))
+if(bias_type == "cluster"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("effect" = rnorm(n(), max(effect, na.rm = T), cluster_sd)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else if(bias_type == "individual"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("cluster_mean" = max(effect, na.rm = T)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>% rowwise() %>%
+    mutate("effect" = ifelse(is.na(effect),
+rnorm(1, cluster_mean * homophily * (1/gdist_to_bias_origin), cluster_sd), effect)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else{print("error, check spelling of bias_type")}
+
+paper$effect[which(is.na(paper$effect))] <-
+  rnorm(length(which(is.na(paper$effect))), 0, single_sd)
+}
+```
+
+## 2.3.1. Spatial correlation of effect sizes with geodist
+
+```{r}
+#| label: simulation_paper_correlog_geodist
+#| warning: false
+#| fig.width: 8
+#| fig.height: 8
+effect_dist_mat <- as.matrix(dist(paper$effect))
+effect_sim_mat <- 1 - (effect_dist_mat/max(effect_dist_mat))
+geo_dist_mat <- geo.dist$gdist
+colnames(geo_dist_mat) <- 1:ncol(geo_dist_mat)
+
+mantel_corlog_geodist <- ncf::mantel.correlog(geo_dist_mat, effect_sim_mat, increment = 1, resamp = 0)
+#tail(mantel_corlog_geodist$correlation, n = 1)
+
+corlog_CI <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(mantel_corlog_geodist$correlation)){
+  corlog_CI[i, 1] <- CIr(mantel_corlog_geodist$correlation[i], mantel_corlog_geodist$n[i])[1]
+  corlog_CI[i, 2] <- CIr(mantel_corlog_geodist$correlation[i], mantel_corlog_geodist$n[i])[2]
+}
+
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,1,1), family = "A")
+plot(mantel_corlog_geodist, ylim = c(.7, 1), ylab = "Effect size similarity",
+                                    xlab = "Geodesic distance", main = "",
+     xlim = c(1, 7), las = 1, xaxt = "n")
+arrows(1, y0 = corlog_CI[1, 1], y1 = corlog_CI[1, 2], length = .05, angle = 90, code = 3)
+arrows(2, y0 = corlog_CI[2, 1], y1 = corlog_CI[2, 2], length = .05, angle = 90, code = 3)
+arrows(3, y0 = corlog_CI[3, 1], y1 = corlog_CI[3, 2], length = .05, angle = 90, code = 3)
+arrows(4, y0 = corlog_CI[4, 1], y1 = corlog_CI[4, 2], length = .05, angle = 90, code = 3)
+arrows(5, y0 = corlog_CI[5, 1], y1 = corlog_CI[5, 2], length = .05, angle = 90, code = 3)
+arrows(7, y0 = corlog_CI[7, 1], y1 = corlog_CI[7, 2], length = .05, angle = 90, code = 3)
+
+abline(v = 6.25)
+abline(v = 6.28)
+points(7, tail(mantel_corlog_geodist$correlation, n = 1), pch = 16)
+arrows(6, y0 = corlog_CI[6, 1], y1 = corlog_CI[6, 2], length = .05, angle = 90, code = 3)
+axis(side = 1, labels = c(1:6, Inf), at = 1:7, family = "A")
+text(c(1.11,2,3,4,5,6,6.8), .7,
+     labels = c("n = 1259", "n = 2834", "n = 148", "n = 14", "n = 4", "n = 2", "n = 75.539"))
+```
+
+## 2.3.2. Spatial correlation of effect sizes with jaccard
+
+```{r}
+#| label: simulation_paper_correlog_jaccard
+jaccard_mat <- geo_dist_mat
+colnames(jaccard_mat) <- 1:ncol(jaccard_mat)
+jac_vals <- sort(rlnorm(160000, meanlog = log(.27), sdlog = .4))
+jac_vals[jac_vals > 1] <- 1
+for(i in 1:160000){
+  jaccard_mat[i] <- ifelse(jaccard_mat[i] == 1, jac_vals[i], 0)
+}
+diag(jaccard_mat) <- 1
+jaccard_mat[lower.tri(jaccard_mat)] <- t(jaccard_mat)[lower.tri(jaccard_mat)]
+rm(jac_vals)
+
+mantel_corlog_jaccard <- ncf::mantel.correlog(jaccard_mat, effect_sim_mat, increment = .035, resamp = 0)
+plot(mantel_corlog_jaccard)
+#tail(mantel_corlog_jaccard$correlation, n = 1)
+
+corlog_CI_jaccard <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(mantel_corlog_geodist$correlation)){
+  corlog_CI_jaccard[i, 1] <- CIr(mantel_corlog_jaccard$correlation[i], mantel_corlog_jaccard$n[i])[1]
+  corlog_CI_jaccard[i, 2] <- CIr(mantel_corlog_jaccard$correlation[i], mantel_corlog_jaccard$n[i])[2]
+}
+```
+
+## 2.4. Analysis
+
+```{r}
+#| label: simulation_paper_analysis
+inv.geo <- 1 - tail(mantel_corlog_geodist$correlation, n = 1) * geo.dist$gdist / max(geo.dist$gdist[which(is.finite(geo.dist$gdist))])
+
+inv.geo[which(inv.geo == -Inf)] <- 0
+colnames(inv.geo) <- 1:n_paper
+hist(inv.geo[inv.geo > 0])
+hist(inv.geo)
+paper$study_id_phyl <- paper$study_id
+null_model <- rma.mv(effect, 1, random = ~ 1|study_id, data = paper)
+summary(null_model)
+full_model <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = inv.geo), data = paper)
+summary(full_model)
+
+
+full_model_jaccard <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = jaccard_mat), data = paper)
+summary(full_model_jaccard)
+```
+
+### 2.4.1. Beta error
+
+Does including the correlation matrix increase the probability of falsely rejecting your hypothesis?
+
+To test this: add x to all effect sizes, shuffle results and check whether there's a difference between null and full model.
+
+Confidence bands are exactly the same with and without correlation matrix (if papers are shuffled (and they are to make sure the correlation matrix is not needed)).
+
+```{r}
+#| label: simulation_paper_beta_error
+real_effect <- 2.5
+shuffled_paper <- paper
+shuffled_paper$effect <- sample(shuffled_paper$effect)
+
+full_model_beta_error <- rma.mv(effect + real_effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = inv.geo), data = shuffled_paper)
+summary(full_model_beta_error)
+
+# and the same without correlation matrix
+summary(rma.mv(effect + real_effect, 1, random = ~ 1|study_id, data = shuffled_paper))
+```
+
+### 2.4.2.1. Adjusted effect sizes inv.geo model
+
+```{r}
+#| label: simulation_paper_ranef
+#| fig.width: 11
+#| fig.height: 11
+ranef_full <- ranef(full_model)
+
+# for adjusted effects: add fixed effects and random effects together to get raw reported effects. to adjust for phylogeny, simply leave random effects of phylogeny out:
+adjusted_effects <- NA
+for(i in 1:n_paper){
+adjusted_effects[i] <- full_model$beta + ranef_full$study_id$intrcpt[i]
+}
+adjusted_effects_se <- NA
+for(i in 1:n_paper){
+  adjusted_effects_se[i] <- full_model$se + ranef_full$study_id$se[i]
+}
+
+ad_effect_dist_mat <- as.matrix(dist(adjusted_effects))
+ad_effect_sim_mat <- 1 - (ad_effect_dist_mat/max(ad_effect_dist_mat))
+
+ad_mantel_corlog_geodist <- ncf::mantel.correlog(geo_dist_mat, ad_effect_sim_mat, increment = 1, resamp = 100)
+
+corlog_CI_ad <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(ad_mantel_corlog_geodist$correlation)){
+  corlog_CI_ad[i, 1] <- CIr(ad_mantel_corlog_geodist$correlation[i], ad_mantel_corlog_geodist$n[i])[1]
+  corlog_CI_ad[i, 2] <- CIr(ad_mantel_corlog_geodist$correlation[i], ad_mantel_corlog_geodist$n[i])[2]
+}
+
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,1,1))
+plot(ad_mantel_corlog_geodist, ylim = c(.7, 1), ylab = "Effect size similarity",
+                                     xlab = "Geodesic distance", main = "",
+     xlim = c(1, 7), las = 1, xaxt = "n", family = "A")
+arrows(1, y0 = corlog_CI_ad[1, 1], y1 = corlog_CI_ad[1, 2], length = .05, angle = 90, code = 3)
+arrows(2, y0 = corlog_CI_ad[2, 1], y1 = corlog_CI_ad[2, 2], length = .05, angle = 90, code = 3)
+arrows(3, y0 = corlog_CI_ad[3, 1], y1 = corlog_CI_ad[3, 2], length = .05, angle = 90, code = 3)
+arrows(4, y0 = corlog_CI_ad[4, 1], y1 = corlog_CI_ad[4, 2], length = .05, angle = 90, code = 3)
+arrows(5, y0 = corlog_CI_ad[5, 1], y1 = corlog_CI_ad[5, 2], length = .05, angle = 90, code = 3)
+arrows(7, y0 = corlog_CI_ad[7, 1], y1 = corlog_CI_ad[7, 2], length = .05, angle = 90, code = 3)
+
+abline(v = 6.25)
+abline(v = 6.28)
+abline()
+points(7, tail(mantel_corlog_geodist$correlation, n = 1), pch = 16, cex = 2)
+arrows(6, y0 = corlog_CI[6, 1], y1 = corlog_CI[6, 2], length = .05, angle = 90, code = 3)
+axis(side = 1, labels = c(1:6, Inf), at = 1:7, family = "A")
+text(c(1.11,2,3,4,5,6,6.8), .7,
+     labels = c("n = 1259", "n = 2834", "n = 148", "n = 14", "n = 4", "n = 2", "n = 75.539"),
+     family = "A")
+
+
+
+#combined plot:
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,1,1), family = "A", cex = 2)
+plot(mantel_corlog_geodist$correlation, ylim = c(.7, 1), xlab = "", ylab = "", cex = 1,
+     xlim = c(1, 7), las = 1, xaxt = "n", pch = 16)
+mtext("Geodesic distance", side = 1, line = 2.5, cex = 3)
+mtext("Effect size similarity", side = 2, line = 2.8, cex = 3)
+# raw:
+arrows(1, y0 = corlog_CI[1, 1], y1 = corlog_CI[1, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(2, y0 = corlog_CI[2, 1], y1 = corlog_CI[2, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(3, y0 = corlog_CI[3, 1], y1 = corlog_CI[3, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(4, y0 = corlog_CI[4, 1], y1 = corlog_CI[4, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(5, y0 = corlog_CI[5, 1], y1 = corlog_CI[5, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(7, y0 = corlog_CI[7, 1], y1 = corlog_CI[7, 2], length = .05, angle = 90, code = 3, lwd = 2)
+lines(1:6, mantel_corlog_geodist$correlation[1:6])
+# adjusted:
+lines(1:6+.1, ad_mantel_corlog_geodist$correlation[1:6], lty = 2, lwd = 2, col = "gray50")
+points(1:7+.1, ad_mantel_corlog_geodist$correlation, lty = 2, pch = 18, cex = 1.5, col = "gray50")
+arrows(1.1, y0 = corlog_CI_ad[1, 1], y1 = corlog_CI_ad[1, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(2.1, y0 = corlog_CI_ad[2, 1], y1 = corlog_CI_ad[2, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(3.1, y0 = corlog_CI_ad[3, 1], y1 = corlog_CI_ad[3, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(4.1, y0 = corlog_CI_ad[4, 1], y1 = corlog_CI_ad[4, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(5.1, y0 = corlog_CI_ad[5, 1], y1 = corlog_CI_ad[5, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(7.1, y0 = corlog_CI_ad[7, 1], y1 = corlog_CI_ad[7, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+# rest:
+par(lwd = 2)
+axis.break(1, breakpos = 6.5)
+par(lwd = 1)
+points(7, tail(mantel_corlog_geodist$correlation, n = 1), pch = 16, cex = 1)
+arrows(6, y0 = corlog_CI[6, 1], y1 = corlog_CI[6, 2], length = .05, angle = 90, code = 3, cex = 1)
+axis(side = 1, labels = c(1:6, Inf), at = 1:7, family = "A")
+text(c(1.15,2.1,3,4,5,6,6.8), .7,
+     labels = c("n = 1259", "n = 2834", "n = 148", "n = 14", "n = 4", "n = 2", "n = 75.539"), cex = .8)
+legend("topleft", legend = c("raw ES", "adjusted ES"), bty = "n", lty = c(1, 2), pch = c(16, 18), col = c("black", "gray50"), lwd = 2, cex = 1.4)
+```
+
+### 2.4.2.2. Adjusted Effects Jaccard model
+
+```{r}
+#| label: simulation_paper_ranef_jaccard
+#| fig.width: 11
+#| fig.height: 11
+ranef_full_jaccard <- ranef(full_model_jaccard)
+
+adjusted_effects_jaccard <- NA
+for(i in 1:n_paper){
+adjusted_effects_jaccard[i] <- full_model_jaccard$beta + ranef_full_jaccard$study_id$intrcpt[i]
+}
+adjusted_effects_jaccard_se <- NA
+for(i in 1:n_paper){
+  adjusted_effects_jaccard_se[i] <- full_model_jaccard$se + ranef_full_jaccard$study_id$se[i]
+}
+
+ad_effect_dist_mat_jaccard <- as.matrix(dist(adjusted_effects_jaccard))
+ad_effect_sim_mat_jaccard <- 1 - (ad_effect_dist_mat_jaccard/max(ad_effect_dist_mat_jaccard))
+
+ad_mantel_corlog_jaccard <- ncf::mantel.correlog(jaccard_mat, ad_effect_sim_mat_jaccard, increment = .035, resamp = 100)
+
+corlog_CI_ad_jaccard <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(ad_mantel_corlog_geodist$correlation)){
+  corlog_CI_ad_jaccard[i, 1] <- CIr(ad_mantel_corlog_jaccard$correlation[i], ad_mantel_corlog_jaccard$n[i])[1]
+  corlog_CI_ad_jaccard[i, 2] <- CIr(ad_mantel_corlog_jaccard$correlation[i], ad_mantel_corlog_jaccard$n[i])[2]
+}
+
+# combined plot:
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,1,1), family = "A", cex = 2)
+plot(rev(mantel_corlog_jaccard$correlation), ylim = c(.7, 1), ylab = "",
+                                     xlab = "", main = "",
+     xlim = c(1, 7), las = 1, xaxt = "n", cex = 1, pch = 16)
+mtext("Jaccard similarity", side = 1, line = 2.5, cex = 3)
+mtext("Effect size similarity", side = 2, line = 2.8, cex = 3)
+# raw:
+arrows(7, y0 = corlog_CI_jaccard[1, 1], y1 = corlog_CI_jaccard[1, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(6, y0 = corlog_CI_jaccard[2, 1], y1 = corlog_CI_jaccard[2, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(5, y0 = corlog_CI_jaccard[3, 1], y1 = corlog_CI_jaccard[3, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(4, y0 = corlog_CI_jaccard[4, 1], y1 = corlog_CI_jaccard[4, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(3, y0 = corlog_CI_jaccard[5, 1], y1 = corlog_CI_jaccard[5, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(2, y0 = corlog_CI_jaccard[6, 1], y1 = corlog_CI_jaccard[6, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(1, y0 = corlog_CI_jaccard[7, 1], y1 = corlog_CI_jaccard[7, 2], length = .05, angle = 90, code = 3, lwd = 2)
+lines(1:6, rev(mantel_corlog_jaccard$correlation)[1:6], lwd = 2)
+# adjusted:
+lines(1:6+.1, rev(ad_mantel_corlog_jaccard$correlation)[1:6], lty = 2, lwd = 2)
+points(1:7+.1, rev(ad_mantel_corlog_jaccard$correlation), lty = 2, cex = 1, pch = 16)
+arrows(7.1, y0 = corlog_CI_ad_jaccard[1, 1], y1 = corlog_CI_ad_jaccard[1, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+arrows(6.1, y0 = corlog_CI_ad_jaccard[2, 1], y1 = corlog_CI_ad_jaccard[2, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+arrows(5.1, y0 = corlog_CI_ad_jaccard[3, 1], y1 = corlog_CI_ad_jaccard[3, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+arrows(4.1, y0 = corlog_CI_ad_jaccard[4, 1], y1 = corlog_CI_ad_jaccard[4, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+arrows(3.1, y0 = corlog_CI_ad_jaccard[5, 1], y1 = corlog_CI_ad_jaccard[5, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+arrows(2.1, y0 = corlog_CI_ad_jaccard[6, 1], y1 = corlog_CI_ad_jaccard[5, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+arrows(1.1, y0 = corlog_CI_ad_jaccard[7, 1], y1 = corlog_CI_ad_jaccard[7, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2)
+# rest:
+par(lwd = 2)
+axis.break(1, breakpos = 6.5)
+par(lwd = 1)
+axis(side = 1, labels = c(.29, .26, .23, .19, .16, .13, 0), at = 1:7, family = "A")
+text(c(1.11,2,3,4,5,6,6.8), .7,
+     labels = c("n = 279", "n = 425", "n = 323", "n = 178", "n = 49", "n = 5", "n = 78.541"), cex = .79)
+legend("topleft", legend = c("raw ES", "adjusted ES"), bty = "n", lty = c(1, 2), pch = 16, lwd = 2, cex = 1.3)
+```
+
+```{r}
+#| label: simulation_paper_ranef_rev_jaccard
+#| fig-width: 11
+#| fig-height: 11
+# combined plot:
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,1,1), family = "A", cex = 2)
+plot(rev(mantel_corlog_jaccard$correlation), ylim = c(.7, 1), ylab = "",
+                                     xlab = "", main = "",
+     xlim = c(1, 7), las = 1, xaxt = "n", cex = 1, pch = 16)
+mtext("Jaccard distance", side = 1, line = 2.5, cex = 3)
+mtext("Effect size similarity", side = 2, line = 2.8, cex = 3)
+# raw:
+arrows(7, y0 = corlog_CI_jaccard[1, 1], y1 = corlog_CI_jaccard[1, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(6, y0 = corlog_CI_jaccard[2, 1], y1 = corlog_CI_jaccard[2, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(5, y0 = corlog_CI_jaccard[3, 1], y1 = corlog_CI_jaccard[3, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(4, y0 = corlog_CI_jaccard[4, 1], y1 = corlog_CI_jaccard[4, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(3, y0 = corlog_CI_jaccard[5, 1], y1 = corlog_CI_jaccard[5, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(2, y0 = corlog_CI_jaccard[6, 1], y1 = corlog_CI_jaccard[6, 2], length = .05, angle = 90, code = 3, lwd = 2)
+arrows(1, y0 = corlog_CI_jaccard[7, 1], y1 = corlog_CI_jaccard[7, 2], length = .05, angle = 90, code = 3, lwd = 2)
+lines(1:6, rev(mantel_corlog_jaccard$correlation)[1:6], lwd = 2)
+# adjusted:
+lines(1:6+.1, rev(ad_mantel_corlog_jaccard$correlation)[1:6], lty = 2, lwd = 2, col = "gray50")
+points(1:7+.1, rev(ad_mantel_corlog_jaccard$correlation), lty = 2, cex = 1.5, pch = 18, col = "gray50")
+arrows(7.1, y0 = corlog_CI_ad_jaccard[1, 1], y1 = corlog_CI_ad_jaccard[1, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(6.1, y0 = corlog_CI_ad_jaccard[2, 1], y1 = corlog_CI_ad_jaccard[2, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(5.1, y0 = corlog_CI_ad_jaccard[3, 1], y1 = corlog_CI_ad_jaccard[3, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(4.1, y0 = corlog_CI_ad_jaccard[4, 1], y1 = corlog_CI_ad_jaccard[4, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(3.1, y0 = corlog_CI_ad_jaccard[5, 1], y1 = corlog_CI_ad_jaccard[5, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(2.1, y0 = corlog_CI_ad_jaccard[6, 1], y1 = corlog_CI_ad_jaccard[5, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+arrows(1.1, y0 = corlog_CI_ad_jaccard[7, 1], y1 = corlog_CI_ad_jaccard[7, 2], length = .05, angle = 90, code = 3, lty = 2, lwd = 2, col = "gray50")
+# rest:
+axis.break(axis = 1, breakpos = 6.5)
+axis(side = 1, labels = c(1-c(.29, .26, .23, .19, .16, .13, 0)), at = 1:7, family = "A")
+text(c(1.11,2,3,4,5,6,6.8), .7,
+     labels = c("n = 279", "n = 425", "n = 323", "n = 178", "n = 49", "n = 5", "n = 78.541"), cex = .79)
+legend("topleft", legend = c("raw ES", "adjusted ES"), bty = "n", lty = c(1, 2), pch = c(16, 18), col = c("black", "gray50"), lwd = 2, cex = 1.4)
+```
+
+### 2.4.2.3. Adjusted Effects Forest Plot
+
+```{r}
+#| label: simulation_paper_adjusted_effects_forest_plot
+#| fig.width: 6
+#| fig.height: 8
+par(mar = c(4,4,1,1), family = "A")
+forest(full_model$yi[1:20], vi = full_model$vi[1:20], xlim = c(-10.40, 10.5), ylim = c(-2.5, 23), header = T, annotate = F, cex.lab = 2, cex.axis = 2)
+addpoly(adjusted_effects[1:20], sei = adjusted_effects_se[1:20], row = 1:20,
+        col = "gray", annotate = F, border = F)
+par(new = TRUE, family = "A")
+forest(full_model$yi[1:20], vi = full_model$vi[1:20], xlim = c(-10.40, 10.5), ylim = c(-2.5, 23), annotate = F, xlab = "", cex.lab = 2, cex.axis = 2)
+addpoly(null_model, row = -1, mlab = "RE Model")
+addpoly(full_model, mlab = "RE Model (Adjusted ES)")
+text(-9, .25, "...", cex = 1.5)
+abline(h = 0)
+```
+
+#### 2.4.2.4. Coloured forest plot
+
+```{r}
+#| label: simulation_paper_adjusted_effects_forest_plot_coloured
+#| fig.width: 8
+#| fig.height: 8
+par(mar = c(4,4,1,1), family = "A")
+forest(full_model$yi, vi = full_model$vi, col = paper$cluster, order = paper$cluster, cex.lab = 2, cex.axis = 2, annotate = F, slab = NA, xlim = c(-25, 20))
+for(i in 1:n_cluster){
+polygon(x = c(-15, -15, 15, 15), y = c(n_paper - length(paper$cluster[paper$cluster < i]), n_paper - length(paper$cluster[paper$cluster <= i]) + 1, n_paper - length(paper$cluster[paper$cluster <= i]) + 1, n_paper - length(paper$cluster[paper$cluster < i])), border = i, lwd = 2)
+text(-20, mean(c(n_paper - length(paper$cluster[paper$cluster < i]), n_paper - length(paper$cluster[paper$cluster <= i]))), labels = paste("Cluster", i), col = i, cex = 1.5)
+}
+
+#test <- ranef(full_model)
+```
+
+\newpage
+
+### 2.4.3. Spurious edges
+
+```{r}
+#| label: simulation_paper_spurious_edges
+spurious_edges_shared_authors <- shared_authors
+number_spurious_edges <- 3
+
+for(i in 1:number_spurious_edges){
+repeat{
+random_cell <- sample(1:n_paper, 2)
+if(spurious_edges_shared_authors[random_cell[1], random_cell[2]] == 0){
+  spurious_edges_shared_authors[random_cell[1], random_cell[2]] <- 1
+  spurious_edges_shared_authors[random_cell[2], random_cell[1]] <- 1
+  break
+}
+}
+}
+
+spurious_edges_net <- as.network(spurious_edges_shared_authors, directed = F)
+spurious_edges_geo.dist <- geodist(spurious_edges_net)
+plot(spurious_edges_net)
+
+spurious_edges_geo.dist <- geodist(spurious_edges_net)
+spurious_edges_geo_dist_mat <- spurious_edges_geo.dist$gdist
+colnames(spurious_edges_geo_dist_mat) <- 1:ncol(spurious_edges_geo_dist_mat)
+
+spurious_edges_mantel_corlog_geodist <- ncf::mantel.correlog(spurious_edges_geo_dist_mat, effect_sim_mat, increment = 1, resamp = 0)
+
+spurious_edges_inv.geo <- 1 - tail(spurious_edges_mantel_corlog_geodist$correlation, n = 1) * geo.dist$gdist / max(geo.dist$gdist[which(is.finite(geo.dist$gdist))])
+
+spurious_edges_inv.geo[which(spurious_edges_inv.geo == -Inf)] <- 0
+colnames(spurious_edges_inv.geo) <- 1:n_paper
+
+# null_model <- rma.mv(effect, 1, random = ~ 1|study_id, data = paper)
+summary(null_model)
+spurious_edges_full_model <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = spurious_edges_inv.geo),
+                     data = paper)
+summary(spurious_edges_full_model)
+summary(full_model)
+```
+
+## 2.5. Network plot
+
+```{r}
+#| label: simulation_paper_network_plot
+#| echo: false
+#| fig-width: 16
+#| fig-height: 12
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(6,0,0,0), xpd = T, family = "A")
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper$effect - min(paper$effect)) / (max(paper$effect - min(paper$effect))) * 99) + 1]
+cols[bias_origin_vertices] <- "yellow"
+plot(net, vertex.col = cols)
+############################## input values #######################################
+mtext("Input values", side = 2, line = -10, at = 40, las = 1)
+mtext("No. of papers", side = 2, line = -6, at = 30, las = 1)
+mtext(n_paper, side = 2, line = -10, at = 30, las = 1)
+mtext("No. of clusters", side = 2, line = -6, at = 20, las = 1)
+mtext(n_cluster, side = 2, line = -10, at = 20, las = 1)
+mtext("No. of isolates", side = 2, line = -6, at = 10, las = 1)
+mtext(n_singles, side = 2, line = -10, at = 10, las = 1)
+mtext("Cluster density", side = 2, line = -6, at = 0, las = 1)
+mtext(cluster_density, side = 2, line = -10, at = 0, las = 1)
+mtext("Cluster evenness", side = 2, line = -6, at = -10, las = 1)
+mtext(cluster_size_evenness, side = 2, line = -10, at = -10, las = 1)
+mtext("Bias origin", side = 2, line = -6, at = -20, las = 1)
+mtext(bias_origin, side = 2, line = -10, at = -20, las = 1)
+mtext("Bias type", side = 2, line = -6, at = -30, las = 1)
+mtext(bias_type, side = 2, line = -10, at = -30, las = 1)
+mtext("Homophily", side = 2, line = -6, at = -40, las = 1)
+mtext(homophily, side = 2, line = -10, at = -40, las = 1)
+mtext("Isolates sd", side = 2, line = -6, at = -50, las = 1)
+mtext(single_sd, side = 2, line = -10, at = -50, las = 1)
+mtext("Cluster sd", side = 2, line = -6, at = -60, las = 1)
+mtext(cluster_sd, side = 2, line = -10, at = -60, las = 1)
+############################## output values #######################################
+shannon_per_clust <- NA
+for(i in 1:n_cluster){
+  pi <- length(which(paper$cluster == i)) / length(which(paper$cluster <= n_cluster))
+  shannon_per_clust[i] <- pi * log(pi)
+}
+clust_even <- -sum(shannon_per_clust) / log(n_cluster)
+###################################################################################
+cluster_size <- NA
+for(i in 1:n_cluster){
+  cluster_size[i] <- length(which(paper$cluster == i))
+}
+clust_num <- length(which(cluster_size > 1))
+###################################################################################
+clust_dens <- NA
+for(i in which(cluster_size > 1)){
+  clust_dens[i] <- network.density(as.network(shared_authors[which(paper$cluster == i), which(paper$cluster == i)], directed = F)) 
+}
+mean_clust_dens <- mean(clust_dens[which(clust_dens > 0)], na.rm = T)
+###################################################################################
+n_singles_out <- length(which(round(paper$degree) == 0))
+###################################################################################
+singles_sd_out <- sd(paper$effect[which(round(paper$degree) == 0)])
+###################################################################################
+cluster_sd_out <- paper %>% group_by(cluster) %>% summarise(sd = sd(effect)) %>%
+  filter(sd > 0) %>% summarise(mean_sd = mean(sd))
+###################################################################################
+mtext("Output values", side = 4, line = -8, at = 40, las = 1)
+#mtext("number of papers", side = 4, line = -8, at = 30, las = 1)
+#mtext(n_paper, side = 4, line = -10, at = 30, las = 1)
+#mtext("number of clusters", side = 4, line = -8, at = 20, las = 1,
+#      col = ifelse(clust_num < n_cluster, "red", "black"))
+#mtext(clust_num, side = 4, line = -10, at = 20, las = 1,
+#      col = ifelse(clust_num < n_cluster, "red", "black"))
+mtext("No. of isolates", side = 4, line = -8, at = 30, las = 1,
+      col = ifelse(n_singles_out - n_singles > .1 * n_singles, "red", "black"))
+mtext(n_singles_out, side = 4, line = -10, at = 30, las = 1,
+      col = ifelse(n_singles_out - n_singles > .1 * n_singles, "red", "black"))
+mtext("Cluster density", side = 4, line = -8, at = 20, las = 1,
+      col = ifelse(abs(cluster_density - mean_clust_dens) > .05, "red", "black"))
+mtext(round(mean_clust_dens, 2), side = 4, line = -10, at = 20, las = 1,
+      col = ifelse(abs(cluster_density - mean_clust_dens) > .05, "red", "black"))
+mtext("Cluster evenness", side = 4, line = -8, at = 10, las = 1,
+      col = ifelse(abs(cluster_size_evenness - clust_even) > .1, "red", "black"))
+mtext(round(clust_even, 2), side = 4, line = -10, at = 10, las = 1,
+      col = ifelse(abs(cluster_size_evenness - clust_even) > .1, "red", "black"))
+mtext("Isolates sd", side = 4, line = -8, at = 0, las = 1,
+      col = ifelse(abs(cluster_size_evenness - clust_even) > .1, "red", "black"))
+mtext(round(singles_sd_out, 2), side = 4, line = -10, at = 0, las = 1,
+      col = ifelse(abs(cluster_size_evenness - clust_even) > .1, "red", "black"))
+mtext("Cluster sd", side = 4, line = -8, at = -10, las = 1,
+      col = ifelse(abs(cluster_size_evenness - clust_even) > .1, "red", "black"))
+mtext(round(cluster_sd_out, 2), side = 4, line = -10, at = -10, las = 1,
+      col = ifelse(abs(cluster_size_evenness - clust_even) > .1, "red", "black"))
+###################################################################################
+legend("bottom", inset = c(0, -.1), title = "Effect sizes", legend = c(round(quantile(paper$effect)), "Bias origin"), fill = c(color_gradient(5), "yellow"), bty = "n", horiz = T)
+```
+
+```{r}
+grid <- expand.grid(1:n_paper, 1:n_paper)
+grid$overlap <- ifelse(paper$cluster[grid$Var1] == paper$cluster[grid$Var2], 1, 0)
+grid$overlap[grid$overlap == 1] <- unlist(lapply(grid$overlap[grid$overlap == 1],
+  function(x)
+    ifelse(runif(1, 0, 100) < (cluster_density / 2 * 100), 1, 0)))
+#cluster_density / 2, because each combination is in grid twice, e.g. 1, 2 and 2, 1
+shared_authors <- matrix(data = grid$overlap, nrow = n_paper, ncol = n_paper, byrow = T)
+colnames(shared_authors) <- 1:n_paper
+net <- as.network(shared_authors, directed = F)
+plot(net)
+```
+
+# Addendum
+
+## Additional code
+
+## Comparison of different similarity matrices
+
+```{r}
+#| label: simulation_paper_invgeo_jaccard
+#| eval: false
+# test 50 times how well different correlation matrices do on biased data
+# comparison between null model, invgeo, jaccard, and invgeo_jaccard
+n_paper <- 400
+n_cluster <- 7
+cluster_density <- .3
+cluster_size_evenness <- .9 
+bias_origin <- "central"
+bias_size <- 5
+bias_type <- "individual"
+homophily <- .6
+cluster_sd <- .5
+single_sd <- 4
+
+results_comparison <- data.frame("null_p" = rep(NA, 50),
+                      "invgeo_p" = rep(NA, 50),
+                      "jaccard_p" = rep(NA, 50),
+                      "jaccard2_p" = rep(NA, 50),
+                      "jaccard3_p" = rep(NA, 50),
+                      "invgeo_jaccard_p" = rep(NA, 50),
+                      "invgeo_jaccard3_p" = rep(NA, 50))
+for(i in 1:50){
+paper <- data.frame("study_id" = as.character(1:n_paper),
+                    "cluster" = c(rep(1:n_cluster, 2),
+                                  sample(as.factor(1:n_cluster), n_paper -
+                                           n_singles - n_cluster * 2, replace = T,
+            prob = abs(sample(rnorm(n_cluster, 100, 100 -
+                                      cluster_size_evenness * 100), n_cluster))^7),
+            seq(n_cluster + 1, length.out = n_singles))) # prob = ...^7, because
+#that gives fairly consistent results,
+# see replication chunk and plot for details
+grid <- expand.grid(1:n_paper, 1:n_paper)
+grid$overlap <- ifelse(paper$cluster[grid$Var1] == paper$cluster[grid$Var2], 1, 0)
+grid$overlap[grid$overlap == 1] <- unlist(lapply(grid$overlap[grid$overlap == 1],
+  function(x)
+    ifelse(runif(1, 0, 100) < (cluster_density / 2 * 100), 1, 0)))
+#cluster_density / 2, because each combination is in grid twice, e.g. 1, 2 and 2, 1
+shared_authors <- matrix(data = grid$overlap, nrow = n_paper, ncol = n_paper, byrow = T)
+colnames(shared_authors) <- 1:n_paper
+net <- as.network(shared_authors, directed = F)
+paper$degree <- jitter(sna::degree(net, gmode = "graph"))
+geo.dist <- geodist(net)
+if(bias_origin == "central"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == max(degree),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "marginal"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == min(degree[degree > .5]),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "random"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & study_id == max(study_id),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else{print("error, check spelling of bias_origin")}
+bias_origin_vertices <- which(!is.na(paper$effect))
+if(any(paper[bias_origin_vertices, "degree"] < .5))
+  {print("error, bias origin not part of its cluster. run simulation again or change parameters")} else{
+paper <- paper %>% group_by(cluster) %>% mutate("gdist_to_bias_origin" =
+         ifelse(cluster <= n_cluster, geo.dist$gdist[as.numeric(study_id),
+                              as.numeric(study_id[which(!is.na(effect))])], NA))
+if(bias_type == "cluster"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("effect" = rnorm(n(), max(effect, na.rm = T), cluster_sd)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else if(bias_type == "individual"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("cluster_mean" = max(effect, na.rm = T)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>% rowwise() %>%
+    mutate("effect" = ifelse(is.na(effect),
+rnorm(1, cluster_mean * homophily * (1/gdist_to_bias_origin), cluster_sd), effect)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else{print("error, check spelling of bias_type")}
+
+paper$effect[which(is.na(paper$effect))] <-
+  rnorm(length(which(is.na(paper$effect))), 0, single_sd)
+} # closing bracket for error message of bias origin being outside of cluster
+
+# correlation matrices
+effect_dist_mat <- as.matrix(dist(paper$effect))
+effect_sim_mat <- 1 - (effect_dist_mat/max(effect_dist_mat))
+geo_dist_mat <- geo.dist$gdist
+colnames(geo_dist_mat) <- 1:ncol(geo_dist_mat)
+
+mantel_corlog <- ncf::mantel.correlog(geo_dist_mat, effect_sim_mat, increment = 1, resamp = 1)
+
+inv.geo <- 1 - tail(mantel_corlog$correlation, n = 1) * geo.dist$gdist / max(geo.dist$gdist[which(is.finite(geo.dist$gdist))])
+inv.geo[which(inv.geo == -Inf)] <- 0
+colnames(inv.geo) <- 1:ncol(inv.geo)
+inv.geo <- make.positive.definite(inv.geo)
+
+paper$study_id_phyl <- paper$study_id
+
+jaccard_mat <- geo_dist_mat
+colnames(jaccard_mat) <- 1:ncol(jaccard_mat)
+jac_vals <- sort(rlnorm(160000, meanlog = log(.27), sdlog = .4))
+jac_vals[jac_vals > 1] <- 1
+for(j in 1:160000){
+  jaccard_mat[j] <- ifelse(jaccard_mat[j] == 1, jac_vals[j], 0)
+}
+diag(jaccard_mat) <- 1
+jaccard_mat[lower.tri(jaccard_mat)] <- t(jaccard_mat)[lower.tri(jaccard_mat)]
+rm(jac_vals)
+jaccard_mat <- make.positive.definite(jaccard_mat)
+
+jaccard2_mat <- make.positive.definite(ifelse(jaccard_mat > 0 & jaccard_mat < 1,
+                                              jaccard_mat * 2, jaccard_mat))
+
+jaccard3_mat <- make.positive.definite(ifelse(jaccard_mat > 0 & jaccard_mat < 1,
+                                              jaccard_mat * 3, jaccard_mat))
+
+invgeo_jaccard_mat <- make.positive.definite(inv.geo + jaccard_mat)
+
+invgeo_jaccard3_mat <- make.positive.definite(inv.geo + jaccard3_mat)
+
+# models to compare
+null_mod <- rma.mv(effect, 1, random = list(~ 1|study_id),
+                   data = paper)
+
+invgeo_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = inv.geo),
+                   data = paper)
+
+jaccard_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = jaccard_mat),
+                   data = paper)
+
+jaccard2_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = jaccard2_mat),
+                   data = paper)
+
+jaccard3_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = jaccard3_mat),
+                   data = paper)
+
+invgeo_jaccard_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~
+                                                      1|study_id_phyl),
+                   R = list(study_id_phyl = invgeo_jaccard_mat),
+                data = paper)
+
+invgeo_jaccard3_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~
+                                                      1|study_id_phyl),
+                   R = list(study_id_phyl = invgeo_jaccard3_mat),
+                data = paper)
+
+results_comparison$null_p[i] <- null_mod$pval
+results_comparison$invgeo_p[i] <- invgeo_mod$pval
+results_comparison$jaccard_p[i] <- jaccard_mod$pval
+results_comparison$jaccard2_p[i] <- jaccard2_mod$pval
+results_comparison$jaccard3_p[i] <- jaccard3_mod$pval
+results_comparison$invgeo_jaccard_p[i] <- invgeo_jaccard_mod$pval
+results_comparison$invgeo_jaccard3_p[i] <- invgeo_jaccard3_mod$pval
+}
+write.csv2(results_comparison, file = "results_comparison_400paper_7cluster.csv")
+
+# no. of false positives
+length(results_comparison$null_p[results_comparison$null_p < .05]) # 28
+length(results_comparison$invgeo_p[results_comparison$invgeo_p < .05]) # 8
+length(results_comparison$jaccard_p[results_comparison$jaccard_p < .05]) # 17
+length(results_comparison$jaccard2_p[results_comparison$jaccard2_p < .05]) # 14
+length(results_comparison$jaccard3_p[results_comparison$jaccard3_p < .05]) # 13
+length(results_comparison$invgeo_jaccard_p[results_comparison$invgeo_jaccard_p < .05]) # 9
+length(results_comparison$invgeo_jaccard3_p[results_comparison$invgeo_jaccard3_p < .05]) # 8
+```
+
+## Network simulation to test effect of bias size and connectedness
+
+```{r}
+#| label: simulation_paper_bias_size_connectedness
+bias_4_connectedness_.01_results <- data.frame("raw_effect" = NA, "new_effect" = NA, "connectedness" = NA, "GCC" = NA, "removed_sig" = NA)
+for(i in vec){
+set.seed(i)
+n_paper <- 200
+n_cluster <- 8
+n_singles <- .2 * n_paper
+cluster_density <- .3
+cluster_size_evenness <- .9
+bias_origin <- "central"
+bias_size <- 4
+bias_type <- "individual"
+homophily <- .7
+cluster_sd <- 1
+single_sd <- 2
+paper <- data.frame("study_id" = as.character(1:n_paper),
+                    "cluster" = c(rep(1:n_cluster, 2),
+                                  sample(as.factor(1:n_cluster), n_paper -
+                                           n_singles - n_cluster * 2, replace = T,
+            prob = abs(sample(rnorm(n_cluster, 100, 100 -
+                                      cluster_size_evenness * 100), n_cluster))^7),
+            seq(n_cluster + 1, length.out = n_singles)))
+grid <- expand.grid(1:n_paper, 1:n_paper)
+grid$overlap <- ifelse(paper$cluster[grid$Var1] == paper$cluster[grid$Var2], 1, 0)
+grid$overlap[grid$overlap == 1] <- unlist(lapply(grid$overlap[grid$overlap == 1],
+  function(x)
+    ifelse(runif(1, 0, 100) < (cluster_density / 2 * 100), 1, 0)))
+shared_authors <- matrix(data = grid$overlap, nrow = n_paper, ncol = n_paper, byrow = T)
+colnames(shared_authors) <- 1:n_paper
+net <- as.network(shared_authors, directed = F)
+paper$degree <- jitter(sna::degree(net, gmode = "graph"))
+geo.dist <- geodist(net)
+if(bias_origin == "central"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == max(degree),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "marginal"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == min(degree[degree > .5]),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "random"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & study_id == max(study_id),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else{print("error, check spelling of bias_origin")}
+bias_origin_vertices <- which(!is.na(paper$effect))
+if(any(paper[bias_origin_vertices, "degree"] < .5))
+  {print("error, bias origin not part of its cluster. run simulation again or change parameters")} else{
+paper <- paper %>% group_by(cluster) %>% mutate("gdist_to_bias_origin" =
+         ifelse(cluster <= n_cluster, geo.dist$gdist[as.numeric(study_id),
+                              as.numeric(study_id[which(!is.na(effect))])], NA))
+if(bias_type == "cluster"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("effect" = rnorm(n(), max(effect, na.rm = T), cluster_sd)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else if(bias_type == "individual"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("cluster_mean" = max(effect, na.rm = T)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>% rowwise() %>%
+    mutate("effect" = ifelse(is.na(effect),
+rnorm(1, cluster_mean * homophily * (1/gdist_to_bias_origin), cluster_sd), effect)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else{print("error, check spelling of bias_type")}
+
+paper$effect[which(is.na(paper$effect))] <-
+  rnorm(length(which(is.na(paper$effect))), 0, single_sd)
+  }
+
+effect_dist_mat <- as.matrix(dist(paper$effect))
+effect_sim_mat <- 1 - (effect_dist_mat/max(effect_dist_mat))
+geo_dist_mat <- geo.dist$gdist
+colnames(geo_dist_mat) <- 1:ncol(geo_dist_mat)
+
+mantel_corlog <- ncf::mantel.correlog(geo_dist_mat, effect_sim_mat, increment = 1, resamp = 1)
+
+inv.geo <- 1 - tail(mantel_corlog$correlation, n = 1) * geo.dist$gdist / max(geo.dist$gdist[which(is.finite(geo.dist$gdist))])
+inv.geo[which(inv.geo == -Inf)] <- 0
+colnames(inv.geo) <- 1:ncol(inv.geo)
+inv.geo <- make.positive.definite(inv.geo)
+paper$study_id_phyl <- paper$study_id
+
+
+null_mod <- rma.mv(effect, 1, random = list(~ 1|study_id),
+                   data = paper)
+
+invgeo_mod <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = inv.geo),
+                   data = paper)
+
+bias_4_connectedness_.01_results[i, "raw_effect"] <- null_mod$b
+bias_4_connectedness_.01_results[i, "new_effect"] <- invgeo_mod$b
+bias_4_connectedness_.01_results[i, "connectedness"] <- connectedness(net)
+bias_4_connectedness_.01_results[i, "GCC"] <- gtrans(net)
+bias_4_connectedness_.01_results[i, "removed_sig"] <- ifelse(null_mod$pval > .05, "nothing to remove", ifelse(invgeo_mod$pval > .05, "yes", "no"))
+}
+```
+
+### Results influential parameters
+
+```{r}
+#| label: paper_simulation_bias_size_connectedness_results
+#| eval: false
+# bias sizes were 4, 8, 12
+# to get desired connectedness, n_isolates was .7, .5, .35, .2
+# saved in paper_files_for_bias_density_plot.Rdata and net_files_for_bias_density_plot.Rdata
+write.csv2(bias_4_connectedness_.01_results, file = "b4c.01_results.csv")
+write.csv2(bias_4_connectedness_.03_results, file = "b4c.03_results.csv")
+write.csv2(bias_4_connectedness_.06_results, file = "b4c.06_results.csv")
+write.csv2(bias_4_connectedness_.1_results, file = "b4c.1_results.csv")
+write.csv2(bias_8_connectedness_.01_results, file = "b8c.01_results.csv")
+write.csv2(bias_8_connectedness_.03_results, file = "b8c.03_results.csv")
+write.csv2(bias_8_connectedness_.06_results, file = "b8c.06_results.csv")
+write.csv2(bias_8_connectedness_.1_results, file = "b8c.1_results.csv")
+write.csv2(bias_12_connectedness_.01_results, file = "b12c.01_results.csv")
+write.csv2(bias_12_connectedness_.03_results, file = "b12c.03_results.csv")
+write.csv2(bias_12_connectedness_.06_results, file = "b12c.06_results.csv")
+write.csv2(bias_12_connectedness_.1_results, file = "b12c.1_results.csv")
+```
+
+### Bias connectedness plot
+
+```{r}
+#| label: paper_simulation_bias_size_connectedness_plot
+#| fig-width: 16
+#| fig-height: 12
+#load("paper_files_for_bias_density_plot.Rdata")
+#load("net_files_for_bias_density_plot.Rdata")
+bg_cols_pre <- colorRampPalette(c(rgb(0,0,1,.1), rgb(0,1,0,.1)))
+bg_cols <- bg_cols_pre(100)[((c(.95,.91,.91,.91,.82,.86,.91,.94,.73,.75,.87,.91)-.73) / (.95-.73)) *99+1]
+
+par(mfrow = c(3,4), mar = c(0,0,0,0), xpd = T, family = "A", oma = c(8,8,0,8), las = 1)
+### plot 1 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[1], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_1$effect - min(paper_1$effect)) / (max(paper_1$effect - min(paper_1$effect))) * 99) + 1]
+plot(net_1, vertex.col = cols)
+### plot 2 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[2], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_2$effect - min(paper_2$effect)) / (max(paper_2$effect - min(paper_2$effect))) * 99) + 1]
+plot(net_2, vertex.col = cols)
+### plot 3 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[3], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_3$effect - min(paper_3$effect)) / (max(paper_3$effect - min(paper_3$effect))) * 99) + 1]
+plot(net_3, vertex.col = cols)
+### plot 4 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[4], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_4$effect - min(paper_4$effect)) / (max(paper_4$effect - min(paper_4$effect))) * 99) + 1]
+plot(net_4, vertex.col = cols)
+### plot 5 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[5], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_5$effect - min(paper_5$effect)) / (max(paper_5$effect - min(paper_5$effect))) * 99) + 1]
+plot(net_5, vertex.col = cols)
+### plot 6 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[6], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_6$effect - min(paper_6$effect)) / (max(paper_6$effect - min(paper_6$effect))) * 99) + 1]
+plot(net_6, vertex.col = cols)
+### plot 7 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[7], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_7$effect - min(paper_7$effect)) / (max(paper_7$effect - min(paper_7$effect))) * 99) + 1]
+plot(net_7, vertex.col = cols)
+### plot 8 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[8], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_8$effect - min(paper_8$effect)) / (max(paper_8$effect - min(paper_8$effect))) * 99) + 1]
+plot(net_8, vertex.col = cols)
+### plot 9 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[9], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_9$effect - min(paper_9$effect)) / (max(paper_9$effect - min(paper_9$effect))) ) + 1]
+plot(net_9, vertex.col = cols)
+### plot 10 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[10], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_10$effect - min(paper_10$effect)) / (max(paper_10$effect - min(paper_10$effect))) * 99) + 1]
+plot(net_10, vertex.col = cols)
+### plot 11 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[11], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_11$effect - min(paper_11$effect)) / (max(paper_11$effect - min(paper_11$effect))) * 99) + 1]
+plot(net_11, vertex.col = cols)
+### plot 12 ###
+plot.new()
+rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+     col = adjustcolor(bg_cols[12], alpha.f = .2))
+par(new = T)
+color_gradient <- colorRampPalette(c("red", "blue"))
+cols <- color_gradient(100)[round((paper_12$effect - min(paper_12$effect)) / (max(paper_12$effect - min(paper_12$effect))) * 99) + 1]
+plot(net_12, vertex.col = cols)
+### axes ###
+par(new = TRUE, mfrow = c(1, 1), oma = c(5,5,0,5), mar = c(0,0,0,0), xpd = NA)
+plot(0, 0, type = "n", xlab = "", ylab = "", axes = FALSE, 
+     xlim = c(0, 16), ylim = range(c(0, 12)), ann = FALSE)
+mtext("Connectedness", 1, line = 3, cex = 3)
+axis(1, outer = T, at = seq(1.5, 14.5, len = 4), labels = c("0.01", "0.03", "0.06", "0.1"))
+mtext("Bias", 2, line = 2.8, cex = 3, las = 0)
+axis(2, outer = T, at = seq(1.5, 10.5, len = 3), labels = c(4,8,12))
+legend_cols <- bg_cols_pre(100)[seq(1,100,len=100)]
+par(fig = c(.95,.96,.3,.7), new = T, oma = c(0,0,0,0))
+image(z=matrix(seq(1,100,len=100), nrow = 1), col = adjustcolor(legend_cols, alpha.f = .2),
+      axes = F)
+axis(4, at = c(0,1), labels = c(0.73,0.95))
+par(oma =c(0,0,0,0), new = T)
+plot.new()
+text(x = 3, y = .5, "Proportion corrected", srt = -90, cex = 2, xpd = NA)
+```
+
+## Finding best hat value for cluster size evenness (for "prob" argument in "sample()") in network simulation
+
+```{r}
+#| label: simulation_paper_replicate
+#| eval: false
+#| echo: false
+cluster_size_evenness <- c(.1, .2, .3, .4, .5, .6, .7, .8, .9, 1)
+hat <- c(1:20)
+test_grid <- expand.grid(cluster_size_evenness, hat)
+results <- data.frame("cluster_size_evenness" = test_grid$Var1,
+                      "hat" = test_grid$Var2,
+                      "res" = NA,
+                      "dif" = NA)
+for(i in 1:200){
+evenness <- replicate(500, {
+paper <- data.frame("study_id" = as.character(1:n_paper),
+                    "effect" = NA,
+                    "cluster" = c(1:n_cluster, sample(as.factor(1:n_cluster), n_paper - n_singles - n_cluster, replace = T, prob = abs(sample(rnorm(n_cluster, 100, 100 - test_grid$Var1[i] * 100), n_cluster))^test_grid$Var2[i]), seq(n_cluster + 1, length.out = n_singles)))
+shannon_per_clust <- NA
+for(i in 1:n_cluster){
+  pi <- length(which(paper$cluster == i)) / length(which(paper$cluster <= n_cluster))
+  shannon_per_clust[i] <- pi * log(pi)
+}
+clust_even <- -sum(shannon_per_clust) / log(n_cluster)
+}
+)
+results[i, 3] <- mean(evenness)
+}
+results$dif <- abs(results$cluster_size_evenness - results$res)
+```
+
+```{r}
+#| label: simulation_paper_hat_plot
+#| eval: false
+#| echo: false
+par(mar = c(5,5,1,1))
+plot(subset(results, cluster_size_evenness == cluster_size_evenness[1])$dif ~
+         subset(results, cluster_size_evenness == cluster_size_evenness[1])$hat,
+       col = 1, type = "l", lwd = 2, ylim = c(0, .9), xlab = "hat values",
+     ylab = "difference between input evenness\nand resulting evenness")
+points(min(subset(results, cluster_size_evenness == cluster_size_evenness[1])$dif)
+       ~ subset(results, cluster_size_evenness == cluster_size_evenness[1])$hat[which(subset(results, cluster_size_evenness == cluster_size_evenness[1])$dif == min(subset(results, cluster_size_evenness == cluster_size_evenness[1])$dif))], pch = 16, cex = 2)
+for(i in 2:10){
+  lines(subset(results, cluster_size_evenness == cluster_size_evenness[i])$dif ~
+         subset(results, cluster_size_evenness == cluster_size_evenness[i])$hat,
+       col = i, type = "l", lwd = 2)
+  points(min(subset(results, cluster_size_evenness == cluster_size_evenness[i])$dif)
+       ~ subset(results, cluster_size_evenness == cluster_size_evenness[i])$hat[which(subset(results, cluster_size_evenness == cluster_size_evenness[i])$dif == min(subset(results, cluster_size_evenness == cluster_size_evenness[i])$dif))], pch = 16, cex = 2, col = i)
+}
+legend("topright", legend = seq(.1, 1, by = .1), col = 1:10, bty = "n",
+       lty = 1, lwd = 2)
+```
+
+## Spurious edges simulation
+
+```{r}
+#| label: spurious_edges_simulation
+#| eval: false
+#| echo: false
+spur_edges_grid <- expand.grid(seq(1, 100, by = 5),
+                               seq(20, 400, by = 10),
+                               c(4, 12))
+
+results_list <- lapply(1:nrow(spur_edges_grid), function(i){
+  
+number_spurious_edges <- spur_edges_grid[i, 1]
+n_paper <- spur_edges_grid[i, 2]
+n_cluster <- 4
+n_singles <- .3 * n_paper
+cluster_density <- .3
+cluster_size_evenness <- .9
+bias_origin <- "central" 
+bias_size <- spur_edges_grid[i, 3]
+bias_type <- "individual"
+homophily <- .7
+cluster_sd <- 1
+single_sd <- 3
+
+paper <- data.frame("study_id" = as.character(1:n_paper),
+                    "cluster" = c(rep(1:n_cluster, 2),
+                                  sample(as.factor(1:n_cluster), n_paper -
+                                           n_singles - n_cluster * 2, replace = T,
+            prob = abs(sample(rnorm(n_cluster, 100, 100 -
+                                      cluster_size_evenness * 100), n_cluster))^7),
+            seq(n_cluster + 1, length.out = n_singles))) # prob = ...^7, because
+#that gives fairly consistent results,
+# see replication chunk and plot for details
+grid <- expand.grid(1:n_paper, 1:n_paper)
+grid$overlap <- ifelse(paper$cluster[grid$Var1] == paper$cluster[grid$Var2], 1, 0)
+grid$overlap[grid$overlap == 1] <- unlist(lapply(grid$overlap[grid$overlap == 1],
+  function(x)
+    ifelse(runif(1, 0, 100) < (cluster_density / 2 * 100), 1, 0)))
+#cluster_density / 2, because each combination is in grid twice, e.g. 1, 2 and 2, 1
+shared_authors <- matrix(data = grid$overlap, nrow = n_paper, ncol = n_paper, byrow = T)
+colnames(shared_authors) <- 1:n_paper
+net <- as.network(shared_authors, directed = F)
+paper$degree <- jitter(sna::degree(net, gmode = "graph"))
+geo.dist <- geodist(net)
+if(bias_origin == "central"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == max(degree),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "marginal"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & degree == min(degree[degree > .5]),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else if(bias_origin == "random"){
+  paper <- paper %>% group_by(cluster) %>%
+    mutate("effect" = ifelse(n() > 1 & study_id == max(study_id),
+                             rnorm(1, 0, bias_size), NA)) %>%
+    ungroup()
+} else{print("error, check spelling of bias_origin")}
+bias_origin_vertices <- which(!is.na(paper$effect))
+#if(any(paper[bias_origin_vertices, "degree"] < .5))
+#  {print("error, bias origin not part of its cluster. run simulation again or change parameters")} else{
+paper <- paper %>% group_by(cluster) %>% mutate("gdist_to_bias_origin" =
+         ifelse(cluster <= n_cluster, geo.dist$gdist[as.numeric(study_id),
+                              as.numeric(study_id[which(!is.na(effect))])], NA))
+if(bias_type == "cluster"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("effect" = rnorm(n(), max(effect, na.rm = T), cluster_sd)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else if(bias_type == "individual"){
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>%
+    mutate("cluster_mean" = max(effect, na.rm = T)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+  paper <- paper %>% group_by(cluster) %>% filter(n() > 1) %>% rowwise() %>%
+    mutate("effect" = ifelse(is.na(effect),
+rnorm(1, cluster_mean * homophily * (1/gdist_to_bias_origin), cluster_sd), effect)) %>%
+    bind_rows(paper %>% group_by(cluster) %>% filter(n() == 1))
+} else{print("error, check spelling of bias_type")}
+
+paper$effect[which(is.na(paper$effect))] <-
+  rnorm(length(which(is.na(paper$effect))), 0, single_sd)
+ # }
+
+effect_dist_mat <- as.matrix(dist(paper$effect))
+effect_sim_mat <- 1 - (effect_dist_mat/max(effect_dist_mat))
+geo_dist_mat <- geo.dist$gdist
+colnames(geo_dist_mat) <- 1:ncol(geo_dist_mat)
+
+mantel_corlog_geodist <- ncf::mantel.correlog(geo_dist_mat, effect_sim_mat, increment = 1, resamp = 0)
+
+inv.geo <- 1 - tail(mantel_corlog_geodist$correlation, n = 1) * geo.dist$gdist / max(geo.dist$gdist[which(is.finite(geo.dist$gdist))])
+
+inv.geo[which(inv.geo == -Inf)] <- 0
+colnames(inv.geo) <- 1:n_paper
+paper$study_id_phyl <- paper$study_id
+
+null_model <- rma.mv(effect, 1, random = ~ 1|study_id, data = paper, control=list(rel.tol=1e-8))
+full_model <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = make.positive.definite(inv.geo)), data = paper, control=list(rel.tol=1e-8))
+
+spurious_edges_shared_authors <- shared_authors
+
+
+for(i in 1:number_spurious_edges){
+repeat{
+random_cell <- sample(1:n_paper, 2)
+if(spurious_edges_shared_authors[random_cell[1], random_cell[2]] == 0){
+  spurious_edges_shared_authors[random_cell[1], random_cell[2]] <- 1
+  spurious_edges_shared_authors[random_cell[2], random_cell[1]] <- 1
+  break
+}
+}
+}
+
+spurious_edges_net <- as.network(spurious_edges_shared_authors, directed = F)
+spurious_edges_geo.dist <- geodist(spurious_edges_net)
+#plot(spurious_edges_net)
+#plot(net)
+
+spurious_edges_geo.dist <- geodist(spurious_edges_net)
+spurious_edges_geo_dist_mat <- spurious_edges_geo.dist$gdist
+colnames(spurious_edges_geo_dist_mat) <- 1:ncol(spurious_edges_geo_dist_mat)
+
+spurious_edges_mantel_corlog_geodist <- ncf::mantel.correlog(spurious_edges_geo_dist_mat, effect_sim_mat, increment = 1, resamp = 0)
+
+spurious_edges_inv.geo <- 1 - tail(spurious_edges_mantel_corlog_geodist$correlation, n = 1) * geo.dist$gdist / max(geo.dist$gdist[which(is.finite(geo.dist$gdist))])
+
+spurious_edges_inv.geo[which(spurious_edges_inv.geo == -Inf)] <- 0
+colnames(spurious_edges_inv.geo) <- 1:n_paper
+
+spurious_edges_full_model <- rma.mv(effect, 1, random = list(~ 1|study_id, ~ 1|study_id_phyl),
+                     R = list(study_id_phyl = make.positive.definite(spurious_edges_inv.geo)),
+                     data = paper, control=list(rel.tol=1e-8))
+
+data.frame(
+    spurious_edges = number_spurious_edges,
+    n_paper = n_paper,
+    bias_size = bias_size,
+    ES_null_mod = null_model$b,
+    se_null_mod = null_model$se,
+    p_val_null_mod = null_model$pval, 
+    ES_full_mod = full_model$b,
+    se_full_mod = full_model$se,
+    p_val_full_mod = full_model$pval,
+    ES_spur_mod = spurious_edges_full_model$b,
+    se_spur_mod = spurious_edges_full_model$se,
+    p_val_spur_mod = spurious_edges_full_model$pval
+  )
+})
+
+
+spurious_edges_results <- do.call(rbind, results_list)
+
+# write.table(spurious_edges_results, file = "spurious_edges_simulation_results.csv", sep = ";")
+spurious_edges_results <- read.csv2("spurious_edges_simulation_results.csv")
+spurious_edges_results[, 4:12] <- lapply(spurious_edges_results[, 4:12], as.numeric)
+
+plot(spurious_edges_results$ES_null_mod ~ spurious_edges_results$spurious_edges,
+     pch = 16, col = "black")
+points(spurious_edges_results$ES_full_mod ~ spurious_edges_results$spurious_edges,
+       pch = 16, col = "red")
+points(spurious_edges_results$ES_spur_mod ~ spurious_edges_results$spurious_edges,
+       pch = 16, col = "blue")
+lines(1:100, predict(lm(ES_null_mod ~ spurious_edges, data = spurious_edges_results), newdata = data.frame("spurious_edges" = 1:100)), col = "black")
+lines(1:100, predict(lm(ES_full_mod ~ spurious_edges, data = spurious_edges_results), newdata = data.frame("spurious_edges" = 1:100)), col = "red")
+lines(1:100, predict(lm(ES_spur_mod ~ spurious_edges, data = spurious_edges_results), newdata = data.frame("spurious_edges" = 1:100)), col = "blue")
+
+
+# lm(abs(ES_spur_mod - ES_full_mod) ~ spurious_edges + n_paper + bias_size, data = spurious_edges_results)
+
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4.5,1,1), family = "A")
+plot(abs(ES_spur_mod - ES_full_mod) ~ jitter(spurious_edges), data = spurious_edges_results, col = as.factor(bias_size), pch = 16, cex = n_paper/150,
+     xlab = "No. of spurious edges", ylab = expression(paste(Delta, "ES")["full model, spurious edges model"]))
+legend("topleft", pch = 16, col = c("red", "black"), legend = c("bias size 12", "bias size 4"), bty = "n")
+
+test <- data.frame("n_paper" = unique(spurious_edges_results$n_paper), "prop_corrected" = NA)
+for(i in unique(spurious_edges_results$n_paper)){
+  test[i/10-1, "prop_corrected"] <- length(which(spurious_edges_results$p_val_full_mod[spurious_edges_results$n_paper == i][which(spurious_edges_results$p_val_null_mod[spurious_edges_results$n_paper == i] < .05)] < .05)) / length(which(spurious_edges_results$p_val_null_mod[spurious_edges_results$n_paper == i] < .05))
+}
+plot(test$prop_corrected ~ test$n_paper)
+
+length(which(spurious_edges_results$p_val_full_mod[spurious_edges_results$n_paper == 110][which(spurious_edges_results$p_val_null_mod[spurious_edges_results$n_paper == 110] < .05)] < .05)) / length(which(spurious_edges_results$p_val_null_mod[spurious_edges_results$n_paper == 110] < .05))
+```

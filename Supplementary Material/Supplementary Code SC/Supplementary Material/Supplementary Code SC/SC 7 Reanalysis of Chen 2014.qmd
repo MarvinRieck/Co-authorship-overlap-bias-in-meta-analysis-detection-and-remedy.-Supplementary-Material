@@ -1,0 +1,424 @@
+---
+title: "Reanalysing Chen et al. (2014)"
+author: ""
+format: pdf
+editor: visual
+root.dir: ""
+---
+
+```{r}
+#| echo: false
+library(knitr)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.width=8, fig.height=8, fig.show='hold', cache=TRUE, tidy=F, tidy.opts=list(width.cutoff=60), size="small")
+```
+
+# 1. Data preparation
+
+```{r}
+#| label: chen_data_prep
+library(dplyr)
+library(psychometric)
+library(officer)
+library(stringr)
+library(plotrix)
+X <- read.csv2("../Supplementary Data SD/SD 7.1 chen_2014_data.csv")
+X <- X[order(X$study), ]
+
+X_ref <- docx_summary(read_docx("../Supplementary Data SD/SD 7.2 chen_2014_ref.docx"))$text
+
+X_authors <- sapply(str_split(X_ref, " \\("), "[[", 1)
+X_authors <- gsub(" ", "", X_authors)
+X_authors <- gsub("DevillyGJSS", "DevillyGJ", X_authors)
+
+X_author_list <- unique(unlist((strsplit(X_authors, "\\,")))) # only 80 authors, moulin paper has 83 nodes in network, but seems like one cluster is wrongfully included (authors can't be found in reference list of original meta-study (bottom right corner figure 2)). at least one is missing (Rapee RM) and one is included twice (T. Karatzias and A. Karatzias)
+#sort(X_author_list)
+
+X$authors <- strsplit(X_authors, "\\,")
+```
+
+# 2. Networks
+
+## 2.1. Bipartite edges
+
+```{r}
+#| label: chen_bipartite_edges
+X_studies <- X[!duplicated(X$study), ]
+X_bipartite_edges <- lapply(X_studies$authors, function(x){X_author_list %in% x})
+X_bipartite_edges <- do.call("cbind", X_bipartite_edges)
+rownames(X_bipartite_edges) <- X_author_list
+colnames(X_bipartite_edges) <- X$study
+```
+
+## 2.2. Co-author overlap network
+
+```{r}
+#| label: X_coauthor_overlap_network
+#| fig-width: 12
+#| fig-height: 12
+#| warning: false
+library(statnet)
+par(mar = c(0,0,0,0))
+X_shared_authors <- t(X_bipartite_edges) %*% X_bipartite_edges
+X_network <- as.network(X_shared_authors, directed = F)
+plot.network(X_network, edge.col = "black",
+             edge.lwd = X_shared_authors, label = network.vertex.names(X_network))
+X_geo.dist <- geodist(X_network)
+
+#connectedness(X_network)
+#gtrans(X_network)
+```
+
+## 2.3. Network properties
+
+```{r}
+#connectedness(X_network)
+#gtrans(X_network)
+#length(isolates(X_network))/network.size(X_network) #proportion of isolates
+#get.inducedSubgraph(X_network, which(duplicated(component.dist(X_network)$membership) | duplicated(component.dist(X_network)$membership, fromLast = TRUE)))
+
+clust_dens <- NA #cluster density
+for(i in 1:length(which(component.dist(X_network)$csize > 1))){
+clust_dens[i] <- network.density(get.inducedSubgraph(X_network, which(component.dist(X_network)$membership %in% which(component.dist(X_network)$csize > 1)[i]))) #cluster density
+}
+mean(clust_dens) #cluster density
+
+-sum(component.dist(X_network)$csize[which(component.dist(X_network)$csize > 1)] / sum(component.dist(X_network)$csize[which(component.dist(X_network)$csize > 1)]) * log(component.dist(X_network)$csize[which(component.dist(X_network)$csize > 1)] / sum(component.dist(X_network)$csize[which(component.dist(X_network)$csize > 1)]))) / log(length(component.dist(X_network)$csize[which(component.dist(X_network)$csize > 1)])) #cluster size evenness
+```
+
+# 3. Analysis
+
+## 3.1. Effect sizes
+
+```{r}
+#| label: bakdash_effect_sizes
+library(metafor)
+X_effect <- X
+X_effect$yi <- as.numeric(X_effect$hedgesg)
+X_effect$vi <- as.numeric(X_effect$var)
+```
+
+## 3.2. Correlogram
+
+```{r}
+#| label: chen_correlogram
+X_effect_dist_mat <- as.matrix(stats::dist(X_effect$yi))
+X_effect_sim_mat <- 1 - (X_effect_dist_mat/max(X_effect_dist_mat))
+X_geo_dist_mat <- X_geo.dist$gdist
+colnames(X_geo_dist_mat) <- 1:ncol(X_geo_dist_mat)
+
+X_mantel_corlog <- ncf::mantel.correlog(X_geo_dist_mat, X_effect_sim_mat,
+                                      increment = 1, resamp = 1)
+plot(X_mantel_corlog)
+tail(X_mantel_corlog$correlation, n = 1)
+```
+
+## 3.3. Similarity matrices
+
+### 3.3.1. Inv.geo
+
+```{r}
+#| label: chen_similarity_matrix_invgeo
+X_inv.geo <- 1 - tail(X_mantel_corlog$correlation, n = 1) *
+  X_geo.dist$gdist / max(X_geo.dist$gdist[which(is.finite(X_geo.dist$gdist))])
+X_inv.geo[X_inv.geo == -Inf] <- 0
+hist(X_inv.geo[X_inv.geo > 0], main = "inv.geo values > 0")
+```
+
+#### 3.3.1.1. Weighted Inv.geo
+
+The following code shows exemplary ways of computing weighted inv.geo matrices. First for the number of shared authors between papers and second by including the (invented) H-index. They may be combined similar to how they are combined with the original inv.geo matrix respectively. Here, inv.geo and the respective additions are given equal weights by normalising both measures, then combining them into a single matrix and normalising again. The importance of the additional weights can be determined e.g. by dividing the values by a chosen number before combining them into a single matrix.
+
+```{r}
+# weight edges according to no. of shared authors
+X_inv.geo_weighted <- (X_shared_authors / max(X_shared_authors[lower.tri(X_shared_authors)]) + X_inv.geo) / (max((X_shared_authors / max(X_shared_authors[lower.tri(X_shared_authors)]) + X_inv.geo)[lower.tri((X_shared_authors / max(X_shared_authors[lower.tri(X_shared_authors)]) + X_inv.geo))]))
+diag(X_inv.geo_weighted) <- 1
+
+# weight edges according to some seniority measure / H-index etc.
+# invented H-index for all authors, must be in order corresponding to X_author_list
+h_index <- floor(rnorm(1:length(X_author_list), 70, 15))
+# normalised cumulative H-index for all shared authors between papers
+x_shared_authors_h_index <- (t(X_bipartite_edges * h_index) %*% X_bipartite_edges) / max((t(X_bipartite_edges * h_index) %*% X_bipartite_edges)[lower.tri((t(X_bipartite_edges * h_index) %*% X_bipartite_edges))])
+diag(x_shared_authors_h_index) <- 1
+
+X_inv.geo_h_index <- (x_shared_authors_h_index + X_inv.geo) /max((x_shared_authors_h_index + X_inv.geo)[lower.tri(x_shared_authors_h_index + X_inv.geo)])
+diag(X_inv.geo_h_index) <- 1
+```
+
+### 3.3.2. Jaccard
+
+```{r}
+#| label: chen_similarity_matrix_jaccard
+jaccard <- function(a, b){
+    intersection = length(intersect(a, b))
+    union = length(a) + length(b) - intersection
+    return(intersection/union)
+}
+
+X_jaccard_matrix <- matrix(data = NA, ncol = length(unique(X$study)),
+                           nrow = length(unique(X$study)))
+for(i in 1:length(unique(X$study))){
+  for(j in 1:length(unique(X$study))){
+    X_jaccard_matrix[i, j] <- jaccard(X_studies$authors[[i]], X_studies$authors[[j]])
+  }
+}
+colnames(X_jaccard_matrix) <- 1:ncol(X_jaccard_matrix)
+hist(X_jaccard_matrix[X_jaccard_matrix > 0], main = "Jaccard values > 0")
+```
+
+```{r}
+#| label: chen_similarity_matrix_jaccard_correlogram
+X_mantel_corlog_jaccard <- ncf::mantel.correlog(X_jaccard_matrix, X_effect_sim_mat,
+                                      increment = .1, resamp = 1)
+plot(X_mantel_corlog_jaccard)
+head(X_mantel_corlog_jaccard$correlation, n = 1)
+```
+
+### 3.3.3. Inv.geo + Jaccard
+
+```{r}
+#| label: chen_similarity_matrix_invgeo_jaccard
+X_invgeo_jaccard <- X_inv.geo + X_jaccard_matrix
+colnames(X_invgeo_jaccard) <- 1:ncol(X_invgeo_jaccard)
+hist(X_invgeo_jaccard[X_invgeo_jaccard > 0],
+     main = "Combination of inv.geo and jaccard > 0")
+```
+
+## 3.4. RMA
+
+### 3.4.1. Preparation
+
+```{r}
+#| label: chen_rma_prep
+library(dplyr)
+colnames(X_inv.geo) <- 1:ncol(X_inv.geo)
+X_effect$study_id.phyl <- 1:22
+X_effect <- X_effect[order(X_effect$study), ]
+X_effect <- X_effect %>%
+  group_by(study) %>%
+  mutate(obs = row_number())
+X_effect$obs <- as.factor(X_effect$obs)
+
+library(igraph)
+X_effect$membership <- NA
+walktrap <- graph_from_adjacency_matrix(X_shared_authors) |> cluster_walktrap()
+counts <- table(X_effect$study)
+X_effect$membership <- as.factor(rep(walktrap$membership, times = counts))
+```
+
+### 3.4.2. Null model
+
+```{r}
+#| label: chen_null_model
+#| eval: false
+X.rma.null <- rma.mv(yi, vi, random = list(~1|study),
+                      data = X_effect)
+save(X.rma.null, file = "chen.rma.null.Rdata")
+```
+
+### 3.4.3. Inv.geo model
+
+```{r}
+#| label: bakdash_invgeo_model
+#| eval: false
+X.rma.full.invgeo <- rma.mv(yi, V = vi, random = list(~1|study,
+                                                         ~1|study_id.phyl),
+              R = list(study_id.phyl = X_inv.geo), data = X_effect)
+save(X.rma.full.invgeo, file = "chen.rma.full.invgeo.Rdata")
+```
+
+### 3.4.4. Jaccard model
+
+```{r}
+#| label: chen_jaccard_model
+#| eval: false
+X.rma.full.jaccard <- rma.mv(yi, V = vi, random = list(~1|study,
+                                                         ~1|study_id.phyl),
+              R = list(study_id.phyl = X_jaccard_matrix), data = X_effect)
+save(X.rma.full.jaccard, file = "chen.rma.full.jaccard.Rdata")
+```
+
+### 3.4.5. Inv.geo + Jaccard model
+
+```{r}
+#| label: chen_invgeo_jaccard_model
+#| eval: false
+X.rma.full.invgeo_jaccard <- rma.mv(yi, V = vi, random = list(~1|study,
+                                                         ~1|study_id.phyl),
+              R = list(study_id.phyl = X_invgeo_jaccard), data = X_effect)
+save(X.rma.full.invgeo_jaccard, file = "chen.rma.full.invgeo_jaccard.Rdata")
+```
+
+### 3.4.6. Summary
+
+```{r}
+#| label: chen_rma_all
+load("chen.rma.null.Rdata")
+load("chen.rma.full.invgeo.Rdata")
+load("chen.rma.full.jaccard.Rdata")
+load("chen.rma.full.invgeo_jaccard.Rdata")
+summary(X.rma.null)
+summary(X.rma.full.invgeo)
+summary(X.rma.full.jaccard)
+summary(X.rma.full.invgeo_jaccard)
+```
+
+## 3.5. Plots
+
+### 3.5.1. Model comparison
+
+```{r}
+#| label: chen_model_comparison_plot
+mod_comp <- data.frame("model" = c("Null model", "Invgeo model",
+                                       "Jaccard model", "Invgeo jaccard model"),
+                       "beta" = c(X.rma.null$beta, X.rma.full.invgeo$beta,
+                                  X.rma.full.jaccard$beta,
+                                  X.rma.full.invgeo_jaccard$beta),
+                       "se" = c(X.rma.null$se, X.rma.full.invgeo$se,
+                                X.rma.full.jaccard$se,
+                                X.rma.full.invgeo_jaccard$se))
+
+forest(mod_comp$beta, vi = mod_comp$se^2, slab = mod_comp$model,
+       header = "Effect size and CI of the different models")
+```
+
+### 3.5.2. Adjusted effect sizes
+
+#### 3.5.2.1. Calculation
+
+```{r}
+#| label: chen_adjusted_effects
+############################ invgeo ##############################
+X_ranef_invgeo <- ranef(X.rma.full.invgeo)
+
+adjusted_effects_invgeo <- X.rma.full.invgeo$beta + X_ranef_invgeo$study$intrcpt
+
+adjusted_effects_invgeo_se <- X.rma.full.invgeo$se + X_ranef_invgeo$study$se
+
+ad_effect_dist_mat_invgeo <- as.matrix(dist(adjusted_effects_invgeo))
+ad_effect_sim_mat_invgeo <- 1 - (ad_effect_dist_mat_invgeo/max(ad_effect_dist_mat_invgeo))
+
+ad_mantel_corlog_geodist <- ncf::mantel.correlog(X_geo_dist_mat, ad_effect_sim_mat_invgeo, increment = 1, resamp = 0)
+############################ jaccard ##############################
+X_ranef_jaccard <- ranef(X.rma.full.jaccard)
+
+adjusted_effects_jaccard <- X.rma.full.jaccard$beta + X_ranef_jaccard$study_id$intrcpt
+
+adjusted_effects_jaccard_se <- X.rma.full.jaccard$se + X_ranef_jaccard$study$se
+
+ad_effect_dist_mat_jaccard <- as.matrix(dist(adjusted_effects_jaccard))
+ad_effect_sim_mat_jaccard <- 1 - (ad_effect_dist_mat_jaccard/max(ad_effect_dist_mat_jaccard))
+
+ad_mantel_corlog_jaccard <- ncf::mantel.correlog(X_jaccard_matrix, ad_effect_sim_mat_jaccard, increment = .1, resamp = 0)
+```
+
+#### 3.5.2.2. Correlogram
+
+```{r}
+#| label: chen_correlogram_adjusted
+#| fig.width: 10
+#| fig.height: 10
+#################### CIs for invgeo ###########################
+######## raw ##########
+corlog_CI_invgeo <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(X_mantel_corlog$correlation)){
+  corlog_CI_invgeo[i, 1] <- CIr(X_mantel_corlog$correlation[i], X_mantel_corlog$n[i])[1]
+  corlog_CI_invgeo[i, 2] <- CIr(X_mantel_corlog$correlation[i], X_mantel_corlog$n[i])[2]
+}
+######## adjusted #####
+corlog_CI_ad_invgeo <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(ad_mantel_corlog_geodist$correlation)){
+  corlog_CI_ad_invgeo[i, 1] <- CIr(ad_mantel_corlog_geodist$correlation[i], ad_mantel_corlog_geodist$n[i])[1]
+  corlog_CI_ad_invgeo[i, 2] <- CIr(ad_mantel_corlog_geodist$correlation[i], ad_mantel_corlog_geodist$n[i])[2]
+}
+#################### CIs for jaccard ###########################
+######## raw ##########
+corlog_CI_jaccard <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(X_mantel_corlog_jaccard$correlation)){
+  corlog_CI_jaccard[i, 1] <- CIr(X_mantel_corlog_jaccard$correlation[i], X_mantel_corlog_jaccard$n[i])[1]
+  corlog_CI_jaccard[i, 2] <- CIr(X_mantel_corlog_jaccard$correlation[i], X_mantel_corlog_jaccard$n[i])[2]
+}
+######## adjusted #####
+corlog_CI_ad_jaccard <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(ad_mantel_corlog_jaccard$correlation)){
+  corlog_CI_ad_jaccard[i, 1] <- CIr(ad_mantel_corlog_jaccard$correlation[i], ad_mantel_corlog_jaccard$n[i])[1]
+  corlog_CI_ad_jaccard[i, 2] <- CIr(ad_mantel_corlog_jaccard$correlation[i], ad_mantel_corlog_jaccard$n[i])[2]
+}
+################## plot ##########################################
+# combined plot:
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,4,1), family = "A", cex = 2, pch = 16)
+plot(X_mantel_corlog$correlation, ylim = c(.5, 1), ylab = "Effect size similarity",
+                                     xlab = "Geodesic distance", main = "", cex = 0.5, las = 1, xaxt = "n")
+# raw invgeo:
+arrows(1, y0 = corlog_CI_invgeo[1, 1], y1 = corlog_CI_invgeo[1, 2], length = .05, angle = 90, code = 3)
+arrows(2, y0 = corlog_CI_invgeo[2, 1], y1 = corlog_CI_invgeo[2, 2], length = .05, angle = 90, code = 3)
+arrows(3, y0 = corlog_CI_invgeo[3, 1], y1 = corlog_CI_invgeo[3, 2], length = .05, angle = 90, code = 3)
+lines(1:2, X_mantel_corlog$correlation[1:2], lwd = 2)
+# adjusted invgeo:
+lines(1:2, ad_mantel_corlog_geodist$correlation[1:2], lwd = 2, lty = 2)
+points(1:3, ad_mantel_corlog_geodist$correlation, lty = 2, cex = .5)
+arrows(1, y0 = corlog_CI_ad_invgeo[1, 1], y1 = corlog_CI_ad_invgeo[1, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(2, y0 = corlog_CI_ad_invgeo[2, 1], y1 = corlog_CI_ad_invgeo[2, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(3, y0 = corlog_CI_ad_invgeo[3, 1], y1 = corlog_CI_ad_invgeo[3, 2], length = .05, angle = 90, code = 3, lty = 2)
+# raw jaccard
+lines(seq(1, 2, len = 2), rev(X_mantel_corlog_jaccard$correlation)[1:2], lwd = 2, col = "blue")
+points(seq(1, 2, len = 2), rev(X_mantel_corlog_jaccard$correlation)[1:2], col = "blue", cex = .5)
+points(3.05, X_mantel_corlog_jaccard$correlation[1], col = "blue", cex = .5)
+arrows(seq(1, 3, len = 3)[3]+.05, y0 = corlog_CI_jaccard[1, 1], y1 = corlog_CI_jaccard[1, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 3, len = 3)[2], y0 = corlog_CI_jaccard[2, 1], y1 = corlog_CI_jaccard[2, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 3, len = 3)[1], y0 = corlog_CI_jaccard[3, 1], y1 = corlog_CI_jaccard[3, 2], length = .05, angle = 90, code = 3, col = "blue")
+# adjusted jaccard
+lines(seq(1, 2, len = 2), rev(ad_mantel_corlog_jaccard$correlation)[1:2], lwd = 2, lty = 2, col = "blue")
+points(seq(1, 2, len = 2), rev(ad_mantel_corlog_jaccard$correlation)[1:2], col = "blue", cex = .5)
+points(3.05, ad_mantel_corlog_jaccard$correlation[1], col = "blue", cex = .5)
+arrows(seq(1, 3, len = 3)[3]+.05, y0 = corlog_CI_ad_jaccard[1, 1], y1 = corlog_CI_ad_jaccard[1, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 3, len = 3)[2], y0 = corlog_CI_ad_jaccard[2, 1], y1 = corlog_CI_ad_jaccard[2, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 3, len = 3)[1], y0 = corlog_CI_ad_jaccard[3, 1], y1 = corlog_CI_ad_jaccard[3, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+# rest:
+axis.break(1, breakpos = 2.5)
+axis.break(3, breakpos = 2.5)
+axis(side = 1, labels = c(1:2, Inf), at = 1:3)
+text(c(1,2,3), .5,
+     labels = c("n = 6", "n = 1", "n = 224"), cex = .5)
+axis(side = 3, labels = 1 - c(round(rev(X_mantel_corlog_jaccard$mean.of.class), 2)), at = c(seq(1, 2, len = 2), 3))
+text(seq(1, 3, len = 3), 1,
+     labels = c("n = 4", "n = 2", "n = 225"),
+     cex = .5)
+mtext("Jaccard Distance", side = 3, line = 2, cex = 2)
+legend(x = 1.2, y = .6, legend = c("raw ES (gdist.)", "adj. ES (gdist.)", "raw ES (jaccard)", "adj. ES (jaccard)"), bty = "n", lty = c(1, 2, 1, 2), ncol = 2,
+       pch = 16, col = c("black", "black", "blue", "blue"))
+```
+
+#### 3.5.2.3. Forest plot
+
+```{r}
+#| label: bakdash_forest_plot
+#| fig.width: 6
+#| fig.height: 6
+par(mar = c(4,4,1,1), family = "A")
+forest(X.rma.full.invgeo$yi, vi = X.rma.full.invgeo$vi, ylim = c(-2.5, 25),
+       xlim = c(-5.5,2.5), header = T, 
+       slab = paste(str_to_title(str_extract(X$study, "\\D+")), "et al.",
+                    str_extract(X$study, "\\d+")))
+addpoly(adjusted_effects_invgeo, sei = adjusted_effects_invgeo_se, row = 1:22,
+        col = "gray", annotate = F, border = F)
+par(new = TRUE, family = "A")
+forest(X.rma.full.invgeo$yi, vi = X.rma.full.invgeo$vi, ylim = c(-2.5, 25),
+       xlim = c(-5.5,2.5), header = T, 
+       slab = paste(str_to_title(str_extract(X$study, "\\D+")), "et al.",
+                    str_extract(X$study, "\\d+")))
+addpoly(X.rma.null, row = -1, mlab = "RE Model")
+addpoly(X.rma.full.invgeo, mlab = "RE Model (Adjusted ES)", col = "gray")
+abline(h = 0)
+```
+
+#### 3.5.2.4. Coloured forest plot
+
+```{r}
+#| label: chen_forest_plot_col
+#| fig.width: 20
+#| fig.height: 20
+par(mar = c(4,4,1,1), family = "A", cex = 1.5)
+forest(X_effect$yi,  vi = X_effect$vi, order = X_effect$membership, 
+       col = as.numeric(X_effect$membership), slab = paste(X_effect$study, "Cluster ", X_effect$membership))
+```

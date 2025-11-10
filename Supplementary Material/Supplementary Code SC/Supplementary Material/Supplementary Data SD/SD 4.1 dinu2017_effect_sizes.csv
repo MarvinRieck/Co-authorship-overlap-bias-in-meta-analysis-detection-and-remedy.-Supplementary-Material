@@ -1,0 +1,503 @@
+﻿study;study_id;country;sex;n_veg;mean_veg;sd_veg;n_omni;mean_omni;sd_omni;treat;measure
+Armstrong et al., (1979); 1;U.S.;M/F;106 ;23 ; 4.5;106 ;23.90; 3.9;vegetarian;bmi
+Knuiman et al., (1982); 2;The Netherlands;M;56 ;21.4 ; 1.7;52 ;24.40; 2.3;vegetarian;bmi
+Shultz et al., (1983); 3;U.S.;M;20 ;24 ; 5;17 ;24 ; 3;vegetarian;bmi
+Shultz et al., (1983); 3;U.S.;F;31 ;23 ; 4;36 ;24 ; 4;vegetarian;bmi
+Shultz et al., (1983); 4 ;U.S.;F;14 ;22.0 ; 4.1;9 ;23.3 ; 3.0;vegetarian;bmi
+Faber et al., (1986); 5;South Africa;M;14 ;23.9 ; 3.5;10 ;24.6 ; 2.1;vegetarian;bmi
+Faber et al., (1986); 5;South Africa;F;19 ;21.5 ; 3.1;12 ;21.1 ; 1.5;vegetarian;bmi
+Melby et al., (1989); 6;U.S.;M/F;55 ;26.3 ; 0.5;59 ;31.4 ; 0.9;vegetarian;bmi
+Melby et al., (1989); 6;U.S.;M/F;164 ;24.6 ; 0.4;100 ;27.4 ; 0.6;vegetarian;bmi
+Nieman et al., (1989); 7;U.S.;F;19 ;22.5 ; 0.6;12 ;24.2 ; 0.8;vegetarian;bmi
+Nieman et al., (1989); 8;U.S.;F;23 ;22.8 ; 0.5;14 ;24.2 ; 0.8;vegetarian;bmi
+Thorogood et al., (1990); 9;U.K.;M;26 ;23.1 ; 0.1;26 ;23.1 ; 0.1;vegetarian;bmi
+Thorogood et al., (1990); 9;U.K.;F;26 ;21.8 ; 0.1;26 ;22.7 ; 0.1;vegetarian;bmi
+Reddy et al., (1992); 10;U.K.;F;40 ;28.5 ; 0.9;22 ;33.8 ; 0.8;vegetarian;bmi
+Supawan et al., (1992); 11;Thailand;M;64 ;19.8 ; 0.6;32 ;21.4 ; 0.7;vegetarian;bmi
+Supawan et al., (1992); 11;Thailand;F;68 ;19.9 ; 0.6;36 ;20.6 ; 0.7;vegetarian;bmi
+Melby et al., (1993); 12;U.S.;M/F;112 ;26.0 ; 0.6;91 ;29.7 ; 0.9;vegetarian;bmi
+Pan et al., (1993); 13;Taiwan;M;23 ;20.0 ; 2.3;20 ;21.3 ; 1.2;vegetarian;bmi
+Pan et al., (1993); 13;Taiwan;F;32 ;20.1 ; 2.8;39 ;20.7 ; 2.6;vegetarian;bmi
+Melby et al., (1994); 14;U.S.;M/F;66 ;26.8 ; 0.8;45 ;28.6 ; 0.8;vegetarian;bmi
+Krajcovicova et al., (1994); 15 ;Slovak Rep.;M;31 ;22.0 ; 0.2;24 ;23.3 ; 0.2;vegetarian;bmi
+Krajcovicova et al., (1994); 15;Slovak Rep.;F;28 ;19.9 ; 0.2;26 ;21.6 ; 0.1;vegetarian;bmi
+Krajcovicova et al, (1995); 16;Slovak Rep.;M/F;12 ;23.1 ; 0.4;14 ;24.7 ; 0.5;vegetarian;bmi
+Krajcovicova et al., (1996); 17;Slovak Rep.;M;42 ;21.7 ; 0.2;29 ;23.5 ; 0.2;vegetarian;bmi
+Krajcovicova et al., (1996); 17;Slovak Rep.;F;39 ;20.7 ; 0.1;33 ;23.0 ; 0.1;vegetarian;bmi
+Williams et al., (1997); 18;U.S.;M;199 ;22.9 ; 2.4;7054 ;23.8 ; 2.5;vegetarian;bmi
+Williams et al., (1997); 18;U.S.;F;152 ;20.8 ; 2.0;1837 ;21.3 ; 2.5;vegetarian;bmi
+Harman et al., (1998); 19;New Zealand;M;12 ;24.1 ; 3.1;11 ;26.4 ; 3.3;vegetarian;bmi
+Harman et al., (1998); 19;New Zealand;F;12 ;23.6 ; 3.1;12 ;25.8 ; 2.9;vegetarian;bmi
+Famodu et al., (1999); 20;Niegeria;M/F;8 ;26.9 ; 0.7;40 ;29.1 ; 0.6;vegetarian;bmi
+Korpela et al., (1999); 21;Finland;M/F;11 ;20.9 ; 1.7;7 ;23.1 ; 1.0;vegetarian;bmi
+Thomas et al., (1999); 22;U.K.;F;578 ;22.5 ; 0.5;376 ;24 ; 0.6;vegetarian;bmi
+Lee et al., (2000); 23;China;M;15 ;23.1 ; 3.1;56 ;24.3 ; 3.6;vegetarian;bmi
+Lee et al., (2000); 23;China;F;45 ;23.2 ; 3.4;77 ;23.7 ; 3.6;vegetarian;bmi
+Kwok et al., (2000); 24;China;F;90 ;23.0 ; 3.8;90 ;22.1 ; 3.8;vegetarian;bmi
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;54 ;22.8 ; 0.2;59 ;24.2 ; 0.3;vegetarian;bmi
+Lu et al., (2000); 26;Taiwan;M;26 ;20.8 ; 3.0;27 ;22.9 ; 2.4;vegetarian;bmi
+Lu et al., (2000); 26;Taiwan;F ;30 ;20.0 ; 2.8;26 ;22.5 ; 3.0;vegetarian;bmi
+Lu et al., (2000); 26;Taiwan;F ;53 ;20.7 ; 2.6;54 ;22.0 ; 2.6;vegetarian;bmi
+Lin et al., (2001); 27;Taiwan;M/F;20 ;23.1 ; 3.1;20 ;24.8 ; 0.1;vegetarian;bmi
+Krajcovicova et al., (2003); 28;Slovak Rep.;M/F;110 ;22.2 ; 0.2;101 ;24.9 ; 0.4;vegetarian;bmi
+Kwok et al., (2005); 29;China;M/F;49 ;22.6 ; 2.7;49 ;22.5 ; 3.0;vegetarian;bmi
+Alewaeters et al., (2005); 30;Belgium;M;120 ;22.6 ; 3.6;4666 ;25.7 ; 4.0;vegetarian;bmi
+Alewaeters et al., (2005); 30;Belgium;F;206 ;22.1 ; 3.1;4993 ;24.6 ; 4.8;vegetarian;bmi
+Newby et al., (2005); 31;Sweden;F;159 ;23.4 ; 3.5;54257 ;24.7 ; 3.9;vegetarian;bmi
+Valachovicova et al., (2006); 32;Slovak Rep.;M/F;95 ;22.1 ; 0.2;107 ;22.5 ; 0.2;vegetarian;bmi
+Su et al., (2006); 33;Taiwan;F;57 ;23.0 ; 2.7;61 ;23.5 ; 2.7;vegetarian;bmi
+Hung et al., (2006); 34;Taiwan;F;49 ;20.9 ; 0.4;49 ;22.0 ; 0.3;vegetarian;bmi
+Fu et al., (2006); 35;Taiwan;F;35 ;23 ; 1;35 ;24 ; 1;vegetarian;bmi
+De Biase et al., (2007); 36;Brazil;M/F;19 ;23.5 ; 4.5;22 ;25.4 ; 5.2;vegetarian;bmi
+Teixeira et al., (2007); 37;Brazil;M/F;67 ;22.6 ; 3.1;134 ;26.7 ; 5.1;vegetarian;bmi
+Yen et al., (2008); 38;Taiwan;M/F;21 ;22.6 ; 2.5;28 ;23.2 ; 4.3;vegetarian;bmi
+Fu et al., (2008); 39;Taiwan;F;35 ;22.8 ; 0.5;35 ;23.8 ; 0.6;vegetarian;bmi
+Slavicek et al., (2008); 40;Czech Rep.;M/F;195 ;22.1 ; 4.8;201 ;25.1 ; 5.2;vegetarian;bmi
+Chen et al., (2008); 41;Taiwan;M/F;99 ;22.9 ; 2.8;99 ;23.8 ; 3.6;vegetarian;bmi
+Karabudak et al., (2008); 42;Turkey;F;26 ;21.7 ; 2.7;26 ;21.6 ; 2.6;vegetarian;bmi
+Pitla et al., (2009); 43;India;M;14 ;25.0 ; 2.7;15 ;24.6 ; 2.2;vegetarian;bmi
+Pitla et al., (2009); 43;India;F;12 ;25.3 ; 3.1;11 ;23.9 ; 4.0;vegetarian;bmi
+Sambol et al., (2009); 44;Croatia;M/F;30 ;23.1 ; 3.0;50 ;23.3 ; 2.7;vegetarian;bmi
+Lin et al., (2010); 45;Taiwan;M/F;102 ;23.4 ; 3.9;102 ;23.3 ; 3.5;vegetarian;bmi
+Cade et al., (2010); 46;U.K.;F;6491 ;23.4 ; 3.9;21951 ;25.1 ; 4.5;vegetarian;bmi
+Beezhold et al., (2010); 47;U.S.;M/F;60 ;25.1 ; 0.7;78 ;27.8 ; 0.9;vegetarian;bmi
+Aubertin-L et al., (2011); 48;Finland;F;11 ;22.5 ; 5.5;10 ;25.8 ; 8.9;vegetarian;bmi
+Yang et al., (2011); 49;China;M;171 ;23.6 ; 4.0;129 ;24.4 ; 2.7;vegetarian;bmi
+Chen et al., (2011); 50;Taiwan;F;173 ;22.9 ; 2.9;190 ;23.3 ; 3.5;vegetarian;bmi
+Stephens et al., (2011); 51;U.S.;M/F;19 ;22.9 ; 1.3;22 ;23.3 ; 0.7;vegetarian;bmi
+Gammon et al., (2012); 52;New Zealand;M/F;34 ;23.9 ; 0.8;90 ;25.9 ; 0.7;vegetarian;bmi
+Pettersen et al., (2012); 53;U.S.;M/F;184 ;25.1 ; 5.2;198 ;29.5 ; 6.6;vegetarian;bmi
+Kim et al., (2012); 54;Rep. of Korea;M/F;45 ;22.1 ; 2.8;30 ;23.4 ; 2.7;vegetarian;bmi
+Kim et al., (2012); 55;Rep. of Korea;F;59 ;22.7 ; 3.4;48 ;25.2 ; 3.0;vegetarian;bmi
+Ingenbleek et al., (2012); 56;France;M;24 ;19.3 ; 0.8;15 ;22.1 ; 0.6;vegetarian;bmi
+Huang et al., (2012); 57;China;M;103 ;23.7 ; 3.1;128 ;24.3 ; 2.7;vegetarian;bmi
+Timko et al., (2012); 58;U.S.;M/F;111 ;23.8 ; 5.9;265 ;24.5 ; 5.3;vegetarian;bmi
+Zhang et al., (2013); 59;China;M;170 ;23.6 ; 4.0;126 ;24.4 ; 2.7;vegetarian;bmi
+Suja et al., (2013); 60;India;M/F;25 ;21.9 ; 2.4;25 ;24.5 ; 3.1;vegetarian;bmi
+Farzana et al., (2013); 61;Bangladesh;M/F;66 ;20.2 ; 3.3;66 ;20.3 ; 2.9;vegetarian;bmi
+Jung et al., (2013); 62;Rep. of Korea;M;148 ;25.2 ; 3.4;148 ;22.9 ; 3.1;vegetarian;bmi
+Chiang et al., (2013); 63;Taiwan;F;391 ;22.9 ; 2.7;315 ;23.8 ; 3.2;vegetarian;bmi
+Orlich et al., (2013); 64;U.S.;M/F;21177 ;26.1 ; 5.3;35359 ;28.3 ; 6.1;vegetarian;bmi
+Chiu et al., (2014); 65;Taiwan;F;1139 ;23 ; 3;1611 ;23.5 ; 3;vegetarian;bmi
+Chiu et al., (2014); 65;Taiwan;M;349 ;23 ; 3;1289 ;24 ; 3;vegetarian;bmi
+Gadgil et al., (2014); 66;U.S.;M/F;91 ;25.8 ; 4.3;59 ;26.6 ; 5.1;vegetarian;bmi
+Vinagre et al., (2014); 67;Brazil;M/F;18 ;23.0 ; 1.6;29 ;23.5 ; 1.2;vegetarian;bmi
+Key et al., (2014); 68;U.K.;M;4624 ;23.2 ; 3.2;8474 ;24.5 ; 3.3;vegetarian;bmi
+Key et al., (2014); 68;U.K.;F;13674 ;22.5 ; 3.5;24017 ;24.2 ; 4.1;vegetarian;bmi
+Hardinge et al., (1954); 69;U.S.;M;15 ;243 ; 21.2;15 ;288 ; 49.0;vegetarian;cholesterol
+Hardinge et al., (1954); 69;U.S.;F;15 ;269 ; 61.0;15 ;295 ; 62.8;vegetarian;cholesterol
+Sacks et al., (1975); 70;U.S.;M/F;115 ;126 ; 30;115 ;184 ; 37;vegetarian;cholesterol
+Simons et al., (1978); 71;Australia;M;20 ;175 ; 27;17 ;223 ; 40;vegetarian;cholesterol
+Burslem et al., (1978); 72;U.S.;M;25 ;131 ; 17.5;35 ;190 ; 30.5;vegetarian;cholesterol
+Burslem et al., (1978); 72;U.S.;F;31 ;140 ; 30;43 ;183.5 ; 31;vegetarian;cholesterol
+Armstrong et al., (1979); 1;U.S.;M/F;106 ;232.0 ; 58;106 ;255.2 ; 58;vegetarian;cholesterol
+Haines et al., (1980); 73;U.K.;M;25 ;181.7 ; 54.1;211 ;216.6 ; 38.7;vegetarian;cholesterol
+Haines et al., (1980); 73;U.K.;F;25 ;201.1 ; 50;71 ;235.9 ; 42.5;vegetarian;cholesterol
+Huijbregts et al., (1980); 74;The Netherlands;M/F;7 ;166.7 ; 18.2;7 ;187.2 ; 27.5;vegetarian;cholesterol
+Burr et al., (1981); 75;U.K.;M;29 ;193.7 ; 30.9;82 ;222.7 ; 44.5;vegetarian;cholesterol
+Burr et al., (1981); 75;U.K.;F;56 ;219.3 ; 35.6;133 ;240.1 ; 41;vegetarian;cholesterol
+Lock et al., (1982); 76;U.S.;M;8 ;135 ; 7;10 ;185 ; 8;vegetarian;cholesterol
+Lock et al., (1982); 76;U.S.;F;28 ;137 ; 4;26 ;178 ; 5;vegetarian;cholesterol
+Knuiman et al., (1982); 2;The Netherlands;M;56 ;181.8 ; 34.8;52 ;212.7 ; 38.7;vegetarian;cholesterol
+Liebman M et al., (1983); 77;U.S.;M;36 ;183 ; 36;18 ;195 ; 26;vegetarian;cholesterol
+Kritchevsky et al., (1984); 78;U.S.;M/F;25 ;149 ; 8.2;25 ;207 ; 6.9;vegetarian;cholesterol
+Fisher et al., (1986); 79;U.S.;M/F;25 ;140.1 ; 28.1;25 ;172.9 ; 26.9;vegetarian;cholesterol
+Faber et al., (1986); 5;South Africa;M;14 ;185.0 ; 50.4;10 ;180.2 ; 46.4;vegetarian;cholesterol
+Faber et al., (1986); 5;South Africa;F;19 ;190.6 ; 40.3;12 ;193.0 ; 34.0;vegetarian;cholesterol
+Thorogood et al., (1987); 80;U.K.;M/F;1550 ;188.7 ; 3.9;1198 ;205.3 ; 38.7;vegetarian;cholesterol
+Nieman et al., (1989); 7;U.S.;F;19 ;209.2 ; 7.7;12 ;250.6 ; 11.2;vegetarian;cholesterol
+Nieman et al., (1989); 8;U.S.;F;23 ;217.3 ; 8.1;13 ;249.8 ; 10.4;vegetarian;cholesterol
+Thorogood et al., (1990); 9 ;U.K.;M;26 ;205 ; 5.8;26 ;228.2 ; 7;vegetarian;cholesterol
+Thorogood et al., (1990); 9;U.K.;F;26 ;208.0 ; 6.2;26 ;230.1 ; 7.7;vegetarian;cholesterol
+Pronczuk et al., (1992); 81;U.S.;M;28 ;122 ; 5;28 ;206 ; 6;vegetarian;cholesterol
+Pronczuk et al., (1992); 81;U.S.;F;51 ;138 ; 3;51 ;188 ; 4;vegetarian;cholesterol
+Reddy et al., (1992); 10;U.K.;F;40 ;178.3 ; 6.5;22 ;200.7 ; 8.2;vegetarian;cholesterol
+Supawan et al., (1992); 11;Thailand;M;69 ;153.5 ; 2.4;32 ;204.5 ; 2.5;vegetarian;cholesterol
+Supawan et al., (1992); 11;Thailand;F;68 ;166.5 ; 1.5;36 ;206.0 ; 2.4;vegetarian;cholesterol
+Ho et al., (1993); 82;China;M/F;15 ;174.0 ; 50.3;20 ;162.4 ; 27.1;vegetarian;cholesterol
+Pan et al., (1993); 13;Taiwan;M;23 ;136.1 ; 17.8;20 ;160.9 ; 27.5;vegetarian;cholesterol
+Pan et al., (1993); 13;Taiwan;F;32 ;135.3 ; 30.2;38 ;171.3 ; 26.7;vegetarian;cholesterol
+Melby et al., (1994); 14;U.S.;M/F;66 ;181.8 ; 3.9;45 ;208.8 ; 7.7;vegetarian;cholesterol
+Krajcovicova et al., (1994); 15;Slovak Rep.;M;31 ;167.8 ; 5.0;24 ;208.4 ; 6.2;vegetarian;cholesterol
+Krajcovicova et al., (1994); 15;Slovak Rep.;F;28 ;158.9 ; 1.2;26 ;203.4 ; 7;vegetarian;cholesterol
+Krajcovicova et al., (1996); 17;Slovak Rep.;M;42 ;174.0 ; 4.6;29 ;218.1 ; 7.7;vegetarian;cholesterol
+Krajcovicova et al., (1996); 17;Slovak Rep.;F;39 ;174.8 ; 3.9;33 ;215.0 ; 5.4;vegetarian;cholesterol
+Williams et al., (1997); 18;U.S.;M;199 ;189.9 ; 38.7;7054 ;196.4 ; 34.4;vegetarian;cholesterol
+Williams et al., (1997); 18;U.S.;F;152 ;182.1 ; 29.4;1837 ;187.2 ; 33.6;vegetarian;cholesterol
+Woo et al., (1998); 83;China;F;106 ;185.6 ; 42.5;53 ;228.2 ; 46.4;vegetarian;cholesterol
+Harman et al., (1998); 19;New Zealand;M;12 ;193.4 ; 30.9;11 ;201.1 ; 38.7;vegetarian;cholesterol
+Harman et al., (1998); 19;New Zealand;F;12 ;185.6 ; 42.5;12 ;205 ; 7.7;vegetarian;cholesterol
+Li et al., (1999); 84;Australia;F;50 ;159.7 ; 27.1;24 ;179.0 ; 33.3;vegetarian;cholesterol
+Korpela et al., (1999); 21;Finland;M/F;11 ;159.7 ; 34.4;7 ;199.2 ; 23.2;vegetarian;cholesterol
+Thomas et al., (1999); 22;U.K.;F;578 ;171.3 ; 3;376 ;184 ; 3.0;vegetarian;cholesterol
+Lee et al., (2000); 23;China;M/F;60 ;174.4 ; 28.6;133 ;187.2 ; 34.8;vegetarian;cholesterol
+Kwok et al., (2000); 24;China;F;90 ;185.6 ; 42.5;90 ;208.8 ; 34.8;vegetarian;cholesterol
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;54 ;179.8 ; 1.55;59 ;219.3 ; 1.9;vegetarian;cholesterol
+Lu et al., (2000); 26;Taiwan;M;26 ;151.2 ; 23.2;26 ;193.3 ; 40.2;vegetarian;cholesterol
+Lu et al., (2000); 26;Taiwan;F 1;29 ;146.6 ; 23.2;27 ;198.4 ; 50.7;vegetarian;cholesterol
+Lu et al., (2000); 26;Taiwan;F 2;55 ;136.9 ; 22.4;60 ;161.3 ; 30.2;vegetarian;cholesterol
+Lin et al., (2001); 27;Taiwan;M/F;20 ;162 ; 32;20 ;166 ; 36;vegetarian;cholesterol
+Szeto et al., (2004); 85;China;M/F;30 ;185.6 ; 42.5;30 ;189.5 ; 50.3;vegetarian;cholesterol
+Kwok et al., (2005); 29;China;M/F;49 ;177.9 ; 30.9;49 ;205 ; 38.7;vegetarian;cholesterol
+Su et al., (2006); 33;Taiwan;F;57 ;189.5 ; 30.9;61 ;212.7 ; 27.1;vegetarian;cholesterol
+Fu et al., (2006); 35;Taiwan;F;35 ;174 ; 4;35 ;204 ; 9;vegetarian;cholesterol
+De Biase et al., (2007); 36;Brazil;M/F;19 ;175.3 ; 28.5;22 ;208.1 ; 49.1;vegetarian;cholesterol
+Teixeira et al., (2007); 37;Brazil;M/F;67 ;173 ; 36;134 ;225 ; 45;vegetarian;cholesterol
+Yen et al., (2008); 38;Taiwan;M/F;21 ;159.4 ; 53.3;28 ;187.2 ; 45.4;vegetarian;cholesterol
+Fu et al., (2008); 39;Taiwan;F;35 ;174.0 ; 4.3;35 ;203.6 ; 8.6;vegetarian;cholesterol
+Slavicek et al., (2008); 40;Czech Rep.;M/F;195 ;155.1 ; 34.8;201 ;200.7 ; 30.9;vegetarian;cholesterol
+Chen et al., (2008); 41;Taiwan;M/F;99 ;184.74 ; 33.2;99 ;202.0 ; 41.1;vegetarian;cholesterol
+Pitla et al., (2009); 43;India;M;14 ;186.4 ; 19.7;15 ;193.3 ; 30.2;vegetarian;cholesterol
+Pitla et al., (2009); 43;India;F;12 ;174.0 ; 20.5;11 ;166.3 ; 24.4;vegetarian;cholesterol
+Sambol et al., (2009); 44 ;Croatia;M/F;30 ;164.0 ; 36.7;50 ;189.1 ; 23.2;vegetarian;cholesterol
+Lin et al., (2010); 45;Taiwan;M/F;102 ;168.8 ; 33;102 ;186.6 ; 31.8;vegetarian;cholesterol
+Yang et al., (2011); 49;China;M;171 ;166.3 ; 24.4;129 ;193.7 ; 33.3;vegetarian;cholesterol
+Chen et al., (2011); 50;Taiwan;F;173 ;180.6 ; 36.6;190 ;192.7 ; 36.6;vegetarian;cholesterol
+Fernandes-Dourado et al., (2011); 86;Brazil;M/F;29 ;160.1 ; 48.5;58 ;207.1 ; 34.7;vegetarian;cholesterol
+Kim et al., (2012); 54;Rep. of Korea;M/F;45 ;173.7 ; 31.4;30 ;193.2 ; 37.9;vegetarian;cholesterol
+Ingenbleek et al., (2012); 56;France;M;24 ;153.9 ; 22.8;15 ;166.7 ; 35.6;vegetarian;cholesterol
+Huang et al., (2012); 57;China;M;103 ;165.1 ; 36.3;128 ;214.6 ; 37.9;vegetarian;cholesterol
+Zhang et al., (2013); 59;China;M;170 ;164.8 ; 24.4;126 ;194.9 ; 35.6;vegetarian;cholesterol
+Jung et al., (2013); 62;Rep. of Korea;M;148 ;201.8 ; 38.2;148 ;212.1 ; 45.3;vegetarian;cholesterol
+Chiang et al., (2013); 63;Taiwan;F;391 ;181 ; 32.1;315 ;201.5 ; 34.8;vegetarian;cholesterol
+Bradbury et al., (2014); 87;U.K.;M;168 ;188.3 ; 1.3;168 ;204.2 ; 1.3;vegetarian;cholesterol
+Bradbury et al., (2014); 87;U.K.;F;255 ;184.1 ; 1.1;256 ;195.3 ; 1.1;vegetarian;cholesterol
+Huang et al., (2014); 88;Taiwan;F;76 ;165.8 ; 31.1;2285 ;175.2 ; 33.2;vegetarian;cholesterol
+Huang et al., (2014); 88;Taiwan;F;51 ;198.9 ; 51.5;1040 ;204.8 ; 38.3;vegetarian;cholesterol
+Jian et al., (2014); 89;Taiwan;M;68 ;172.4 ; 33.2;3144 ;181.7 ; 35.9;vegetarian;cholesterol
+Jian et al., (2014); 89;Taiwan;F;127 ;178.5 ; 43.1;3325 ;184.3 ; 37.4;vegetarian;cholesterol
+Vinagre et al., (2014); 67;Brazil;M/F;18 ;166.3 ; 26.7;29 ;166.3 ; 26.7;vegetarian;cholesterol
+Sacks et al., (1975); 70;U.S.;M/F;115 ;73 ; 24;115 ;118 ; 34;vegetarian;ldl_cholesterol
+Burslem et al., (1978); 72;U.S.;M;25 ;78.5 ; 16;35 ;124 ; 29;vegetarian;ldl_cholesterol
+Burslem et al., (1978); 72;U.S.;F;31 ;87.5 ; 22.5;43 ;121 ; 29.5;vegetarian;ldl_cholesterol
+Huijbregts et al., (1980); 74;The Netherlands;M/F;7 ;102.1 ; 18.2;7 ;111 ; 24.8;vegetarian;ldl_cholesterol
+Lock et al., (1982); 76;U.S.;M;8 ;85 ; 7;10 ;126 ; 2;vegetarian;ldl_cholesterol
+Lock et al., (1982); 76;U.S.;F;28 ;77 ; 4;26 ;106 ; 2;vegetarian;ldl_cholesterol
+Knuiman et al., (1982); 2;The Netherlands;M;17 ;116.0 ; 27.1;14 ;114.9 ; 27.5;vegetarian;ldl_cholesterol
+Liebman et al., (1983); 77;U.S.;M;36 ;117 ; 32;18 ;126 ; 22;vegetarian;ldl_cholesterol
+Fisher et al., (1986); 79;U.S.;M/F;25 ;95.7 ; 22.4;25 ;114.9 ; 23.4;vegetarian;ldl_cholesterol
+Thorogood et al., (1987); 80;U.K.;M/F;1550 ;106 ; 3.5;1198 ;122.6 ; 3.5;vegetarian;ldl_cholesterol
+Nieman et al., (1989); 7;U.S.;F;19 ;121.4 ; 7.4;12 ;158.2 ; 10.4;vegetarian;ldl_cholesterol
+Nieman et al., (1989); 8;U.S.;F;23 ;129.2 ; 7.4;13 ;157.8 ; 9.7;vegetarian;ldl_cholesterol
+Thorogood et al., (1990); 9;U.K.;M;26 ;121.4 ; 5.8;26 ;136.1 ; 8.1;vegetarian;ldl_cholesterol
+Thorogood et al., (1990); 9;U.K.;F;26 ;123.4 ; 5.8;26 ;146.6 ; 7;vegetarian;ldl_cholesterol
+Reddy et al., (1992); 10;U.K.;F;40 ;97.1 ;  44.7;22 ;118.7 ; 8.6;vegetarian;ldl_cholesterol
+Supawan et al., (1992); 11;Tailandia;M;64 ;84.0 ; 2.1;32 ;131.0 ; 2.8;vegetarian;ldl_cholesterol
+Supawan et al., (1992); 11;Tailandia;F;68 ;89.0 ; 1.6;36 ;119.0 ; 2.3;vegetarian;ldl_cholesterol
+Melby et al., (1994); 14;U.S.;M/F;66 ;119.9 ; 3.9;45 ;139.2 ; 7.7;vegetarian;ldl_cholesterol
+Krajcovicova et al., (1994); 15;Slovak Rep.;M;31 ;100.9 ; 5.0;24 ;131.9 ; 5.4;vegetarian;ldl_cholesterol
+Krajcovicova et al., (1994); 15;Slovak Rep.;F;28 ;92.4 ; 4.6;26 ;127.6 ; 4.6;vegetarian;ldl_cholesterol
+Krajcovicova et al., (1996); 17;Slovak Rep.;M;42 ;105.6 ; 3.5;29 ;134.6 ; 4.3;vegetarian;ldl_cholesterol
+Krajcovicova et al., (1996); 17;Slovak Rep.;F;39 ;106.3 ; 3.9;33 ;129.5 ; 3.1;vegetarian;ldl_cholesterol
+Williams et al., (1997); 18;U.S.;M;199 ;119.1 ; 35.2;7054 ;124.5 ; 31.3;vegetarian;ldl_cholesterol
+Williams et al., (1997); 18;U.S.;F;152 ;103.2 ; 25.5;1837 ;107.9 ; 29.4;vegetarian;ldl_cholesterol
+Harman et al., (1998); 19;New Zeeland;M;12 ;123.7 ; 27.1;11 ;135.3 ; 38.7;vegetarian;ldl_cholesterol
+Harman et al., (1998); 19;New Zeeland;F;12 ;116.0 ; 38.7;12 ;135.3 ; 34.8;vegetarian;ldl_cholesterol
+Li et al., (1999); 84;Australia;F;50 ;87.4 ; 2.7;24 ;101.3 ; 32.5;vegetarian;ldl_cholesterol
+Korpela et al., (1999); 21;Finland;M/F;11 ;104.0 ; 25.9;7 ;128.4 ; 26.7;vegetarian;ldl_cholesterol
+Thomas et al., (1999); 22;U.K.;F;578 ;106.3 ; 2.7;376 ;119.9 ; 2.7;vegetarian;ldl_cholesterol
+Lee et al., (2000); 23;China;M/F;60 ;108.3 ; 27.1;133 ;116.0 ; 30.9;vegetarian;ldl_cholesterol
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;54 ;104.0 ; 1.2;59 ;139.6 ; 1.6;vegetarian;ldl_cholesterol
+Lu et al., (2000); 26;Taiwan;M;26 ;92.8 ; 22.4;26 ;137.7 ; 38.3;vegetarian;ldl_cholesterol
+Lu et al., (2000); 26;Taiwan;F 1;29 ;80.8 ; 22;27 ;128.8 ; 47.2;vegetarian;ldl_cholesterol
+Lu et al., (2000); 26;Taiwan;F 2;55 ;76.2 ; 22.4;60 ;101.3 ; 29;vegetarian;ldl_cholesterol
+Lin et al., (2001); 27;Taiwan;M/F;20 ;116 ; 29;20 ;120 ; 30;vegetarian;ldl_cholesterol
+Kwok et al., (2005); 29;China;M/F;49 ;92.8 ; 23.2;49 ;131.5 ; 38.7;vegetarian;ldl_cholesterol
+Su et al., (2006); 33;Taiwan;F;57 ;108.3 ; 27.1;61 ;123.7 ; 27.1;vegetarian;ldl_cholesterol
+Fu et al., (2006); 35;Taiwan;F;35 ;112 ; 6;35 ;136 ; 7;vegetarian;ldl_cholesterol
+De Biase et al., (2007); 36;Brazil;M/F;19 ;101.5 ; 28.1;22 ;123.4 ; 42.7;vegetarian;ldl_cholesterol
+Teixeira et al., (2007); 37;Brazil;M/F;67 ;106 ; 35;134 ;151 ; 43;vegetarian;ldl_cholesterol
+Fu et al., (2008); 39;Taiwan;F;35 ;111.6 ; 6.1;35 ;135.9 ; 6.8;vegetarian;ldl_cholesterol
+Chen et al., (2008); 41;Taiwan;M/F;99 ;119.6 ; 31.6;99 ;135.9 ; 39.5;vegetarian;ldl_cholesterol
+Pitla et al., (2009); 43;India;M;14 ;116.0 ; 17.0;15 ;127.6 ; 30.9;vegetarian;ldl_cholesterol
+Pitla et al., (2009); 43;India;F;12 ;112.1 ; 20.9;11 ;108.3 ; 22.0;vegetarian;ldl_cholesterol
+Sambol et al., (2009); 44;Croatia;M/F;30 ;83.9 ; 34.8;50 ;114.9 ; 23.2;vegetarian;ldl_cholesterol
+Yang et al., (2011); 49;China;M;171 ;100.2 ; 21.7;129 ;120.3 ; 30.9;vegetarian;ldl_cholesterol
+Chen et al., (2011); 50;Taiwan;F;173 ;118.2 ; 32.8;190 ;126.4 ; 34.3;vegetarian;ldl_cholesterol
+Fernandes-Dourado et al., (2011); 86;Brazil;M/F;29 ;87.4 ; 50.4;58 ;143.8 ; 34.1;vegetarian;ldl_cholesterol
+Kim et al., (2012); 54;Rep. of Korea;M/F;45 ;101.4 ; 23.6;30 ;120.6 ; 34.6;vegetarian;ldl_cholesterol
+Ingenbleek et al., (2012); 56;France;M;24 ;87.8 ; 12.4;15 ;82 ; 9.7;vegetarian;ldl_cholesterol
+Huang et al., (2012); 57;China;M;103 ;82 ; 22.0;128 ;104.8 ; 26.7;vegetarian;ldl_cholesterol
+Zhang et al., (2013); 59;China;M;170 ;99.8 ; 22.4;126 ;120.3 ; 30.9;vegetarian;ldl_cholesterol
+Jung et al., (2013); 62;Rep. of Korea;M;148 ;131.4 ; 34.9;148 ;131.9 ; 35.8;vegetarian;ldl_cholesterol
+Chiang et al., (2013); 63;Taiwan;F;391 ;116.4 ; 28.6;315 ;132.6 ; 31.3;vegetarian;ldl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;76 ;102.2 ; 20.9;2285 ;107.7 ; 24.1;vegetarian;ldl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;51 ;128.9 ; 37.5;1040 ;129.3 ; 27.4;vegetarian;ldl_cholesterol
+Jian et al., (2014); 89;Taiwan;M;68 ;108.3 ; 24.8;3144 ;116.4 ; 26.7;vegetarian;ldl_cholesterol
+Jian et al., (2014); 89;Taiwan;F;127 ;112.5 ; 31.2;3325 ;114.4 ; 27.1;vegetarian;ldl_cholesterol
+Vinagre et al., (2014); 67;Brazil;M/F;18 ;102.9 ; 25.9;29 ;104.8 ; 26.7;vegetarian;ldl_cholesterol
+Sacks et al., (1975); 70;U.S.;M/F;115 ;43 ; 11;115 ;49 ; 12;vegetarian;hdl_cholesterol
+Burslem et al., (1978); 72;U.S.;M;25 ;39 ; 6;35 ;47 ; 9;vegetarian;hdl_cholesterol
+Burslem et al., (1978); 72;U.S.;F;31 ;43.5 ; 8;43 ;52 ; 12;vegetarian;hdl_cholesterol
+Huijbregts et al., (1980); 74;The Netherlands;M/F;7 ;51.8 ; 4.3;7 ;58.8 ; 7.4;vegetarian;hdl_cholesterol
+Burr et al., (1981); 75;U.K.;M;29 ;46.8 ; 11.2;82 ;44.5 ; 12.8;vegetarian;hdl_cholesterol
+Burr et al., (1981); 75;U.K.;F;56 ;55.3 ; 13.2;133 ;55.7 ; 14;vegetarian;hdl_cholesterol
+Lock et al., (1982); 76;U.S.;M;8 ;42 ; 3;10 ;46 ; 1;vegetarian;hdl_cholesterol
+Lock et al., (1982); 76;U.S.;F;28 ;49 ; 2;26 ;56 ; 1;vegetarian;hdl_cholesterol
+Knuiman et al., (1982); 2;The Netherlands;M;56 ;54.1 ; 11.6;52 ;46.4 ; 11.6;vegetarian;hdl_cholesterol
+Liebman et al., (1983); 77;U.S.;M;36 ;43 ; 9;18 ;45 ; 8;vegetarian;hdl_cholesterol
+Fisher et al., (1986); 79;U.S.;M/F;25 ;41.4 ; 12.7;25 ;49.5 ; 12.8;vegetarian;hdl_cholesterol
+Faber et al., (1986); 5;South Africa;M;14 ;53.0 ; 12.8;10 ;53.4 ; 14.1;vegetarian;hdl_cholesterol
+Faber et al., (1986); 5;South Africa;F;19 ;66.4 ; 13.6;12 ;71.3 ; 14.1;vegetarian;hdl_cholesterol
+Thorogood et al., (1987); 80;U.K.;F;1550 ;58.0 ; 1.4;1198 ;57.6 ; 1.4;vegetarian;hdl_cholesterol
+Nieman et al., (1989); 7;U.S.;F;19 ;63.0 ; 3.5;12 ;68.5 ; 3.9;vegetarian;hdl_cholesterol
+Nieman et al., (1989); 8;U.S.;F;23 ;62.7 ; 3.1;13 ;68.1 ; 3.5;vegetarian;hdl_cholesterol
+Thorogood et al., (1990); 9;U.K.;M;26 ;60.7 ; 1.9;26 ;60.3 ; 2.7;vegetarian;hdl_cholesterol
+Thorogood et al., (1990); 9;U.K.;F;26 ;65 ; 2.3;26 ;66.9 ; 3.1;vegetarian;hdl_cholesterol
+Reddy et al., (1992); 10;U.K.;F;40 ;63.8 ; 3.1;22 ;64.2 ; 2.7;vegetarian;hdl_cholesterol
+Supawan et al., (1992); 11;Thailand;M;64 ;46.5 ; 1.2;32 ;54.0 ; 1.7;vegetarian;hdl_cholesterol
+Supawan et al., (1992); 11;Thailand;F;68 ;56.0 ; 1.5;36 ;66.0 ; 1.4;vegetarian;hdl_cholesterol
+Melby et al., (1994); 14;U.S.;M/F;66 ;46.4 ; 3.9;45 ;50.3 ; 3.9;vegetarian;hdl_cholesterol
+Krajcovicova et al., (1994); 15;Slovak Rep.;M;31 ;50.3 ; 1.6;24 ;51.4 ; 1.2;vegetarian;hdl_cholesterol
+Krajcovicova et al., (1994); 15;Slovak Rep.;F;28 ;51.0 ; 1.2;26 ;52.6 ; 1.9;vegetarian;hdl_cholesterol
+Krajcovicova et al., (1996); 17;Slovak Rep.;M;42 ;51.4 ; 1.9;29 ;52.6 ; 1.6;vegetarian;hdl_cholesterol
+Krajcovicova et al., (1996); 17;Slovak Rep.;F;39 ;52.2 ; 1.9;33 ;52.2 ; 1.9;vegetarian;hdl_cholesterol
+Williams et al., (1997); 18;U.S.;M;199 ;48.7 ; 12.4;7054 ;51.8 ; 13.5;vegetarian;hdl_cholesterol
+Williams et al., (1997); 18;U.S.;F;152 ;62.3 ; 16.2;1837 ;63.4 ; 16.6;vegetarian;hdl_cholesterol
+Harman et al., (1998);  19;New Zealand;M;12 ;46.4 ; 11.6;11 ;46.4 ; 11.6;vegetarian;hdl_cholesterol
+Harman et al., (1998);  19;New Zealand;F;12 ;54.1 ; 11.6;12 ;50.3 ; 7.7;vegetarian;hdl_cholesterol
+Li et al., (1999); 84;Australia;F;50 ;44.5 ; 17.4;24 ;63.0 ; 14.7;vegetarian;hdl_cholesterol
+Korpela et al., (1999); 21;Finland;M/F;11 ;47.2 ; 11.2;7 ;55.3 ; 16.6;vegetarian;hdl_cholesterol
+Thomas et al., (1999); 22;U.K.;F;578 ;50.7 ; 0.7;376 ;49.9 ; 0.9;vegetarian;hdl_cholesterol
+Lee et al., (2000); 23;China;M/F;60 ;46.4 ; 9.7;133 ;51.0 ; 11.6;vegetarian;hdl_cholesterol
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;54 ;54.9 ; 0.8;59 ;50.7 ; 1.2;vegetarian;hdl_cholesterol
+Lu et al., (2000); 26;Taiwan;M;26 ;100.1 ; 22.1;26 ;102.7 ; 21.3;vegetarian;hdl_cholesterol
+Lu et al., (2000); 26;Taiwan;F 1;29 ;122.2 ; 26.3;27 ;138.2 ; 34.5;vegetarian;hdl_cholesterol
+Lu et al., (2000); 26;Taiwan;F 2;55 ;103.6 ; 28.3;60 ;105.4 ; 28.3;vegetarian;hdl_cholesterol
+Lin et al., (2001); 27;Taiwan;M/F;20 ;48 ; 8;20 ;46 ; 17;vegetarian;hdl_cholesterol
+Su et al., (2006); 33;Taiwan;F;57 ;58.0 ; 11.6;61 ;65.7 ; 15.5;vegetarian;hdl_cholesterol
+Fu et al., (2006); 35;Taiwan;F;35 ;50 ; 6;35 ;49 ; 5;vegetarian;hdl_cholesterol
+De Biase et al., (2007); 36;Brazil;M/F;19 ;55.5 ; 14.6;22 ;56.2 ; 18.3;vegetarian;hdl_cholesterol
+Teixeira et al., (2007); 37;Brazil;M/F;67 ;45.2 ; 10;134 ;45.7 ; 12;vegetarian;hdl_cholesterol
+Yen et al., (2008); 38;Taiwan;M/F;21 ;49.1 ; 10.7;28 ;53.3 ; 11.9;vegetarian;hdl_cholesterol
+Fu et al., (2008); 39;Taiwan;F;35 ;50.3 ; 6.2;35 ;49.4 ; 5.1;vegetarian;hdl_cholesterol
+Chen et al., (2008); 41;Taiwan;M/F;99 ;56.2 ; 15.2;99 ;55.6 ; 14.5;vegetarian;hdl_cholesterol
+Pitla et al., (2009); 43;India;M;14 ;34.8 ; 8.5;15 ;38.7 ; 5.4;vegetarian;hdl_cholesterol
+Pitla et al., (2009); 43;India;F;12 ;38.7 ; 6.2;11 ;38.7 ; 5.0;vegetarian;hdl_cholesterol
+Sambol et al., (2009); 44;Croatia;M/F;30 ;46.4 ; 27.1;50 ;44.5 ; 19.3;vegetarian;hdl_cholesterol
+Yang et al., (2011); 49;China;M;171 ;43.3 ; 7;129 ;47.6 ; 8.5;vegetarian;hdl_cholesterol
+Chen et al., (2011); 50;Taiwan;F;173 ;55.6 ; 13.3;190 ;62.1 ;14.50;vegetarian;hdl_cholesterol
+Fernandes-Dourado et al., (2011); 86;Brazil;M/F;29 ;44.6 ; 12.4;58 ;40.1 ; 7.4;vegetarian;hdl_cholesterol
+Kim et al., (2012); 54;Rep. of Korea;M/F;45 ;47.6 ; 9.5;30 ;50.3 ; 10.1;vegetarian;hdl_cholesterol
+Kim et al., (2012); 55;Rep. of Korea;F;59 ;44.0 ; 11.7;48 ;44.2 ; 12.6;vegetarian;hdl_cholesterol
+Ingenbleek et al., (2012); 56;France;M;24 ;46.4 ; 15.5;15 ;57.6 ; 11.6;vegetarian;hdl_cholesterol
+Huang et al., (2012); 57;China;M;103 ;45.6 ; 10.1;128 ;49.9 ; 11.6;vegetarian;hdl_cholesterol
+Forestell et al., (2012); 90;U.S.;F;55 ;21.4 ; 0.3;91 ;22.2 ; 0.3;vegetarian;hdl_cholesterol
+Zhang et al., (2013); 59;China;M;170 ;43.7 ; 8.1;126 ;47.6 ; 8.5;vegetarian;hdl_cholesterol
+Jung et al., (2013); 62;Rep. of Korea;M;148 ;50.7 ; 12.8;148 ;59.6 ; 15.6;vegetarian;hdl_cholesterol
+Chiang et al., (2013); 63;Taiwan;F;391 ;55.3 ; 13.5;315 ;59.2 ; 15.1;vegetarian;hdl_cholesterol
+Bradbury et al., (2014); 87;U.K.;M;168 ;44.5 ; 0.8;168 ;44.9 ; 0.8;vegetarian;hdl_cholesterol
+Bradbury et al., (2014); 87;U.K.;F;255 ;54.9 ; 0.7;256 ;57.2 ; 0.7;vegetarian;hdl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;76 ;54.9 ; 13.1;2285 ;58.5 ; 13.2;vegetarian;hdl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;51 ;55.4 ; 14.8;1040 ;61.0 ; 16.1;vegetarian;hdl_cholesterol
+Jian et al., (2014); 89;Taiwan;M;68 ;50.5 ; 14.3;3144 ;51.6 ; 14.5;vegetarian;hdl_cholesterol
+Jian et al., (2014); 89;Taiwan;F;127 ;55.1 ; 13.8;3325 ;59.3 ; 14.2;vegetarian;hdl_cholesterol
+Vinagre et al., (2014); 67;Brazil;M/F;18 ;42.1 ; 7.7;29 ;44.9 ; 12;vegetarian;hdl_cholesterol
+Sacks et al., (1975); 70;U.S.;M/F;115 ;59 ; 29;115 ;86 ; 47;vegetarian;triglycerides
+Simons et al., (1978); 71;Australia;M;20 ;80 ; 40;17 ;103 ; 40;vegetarian;triglycerides
+Burslem et al., (1978); 72;U.S.;M;25 ;80 ; 34.5;35 ;104 ; 42;vegetarian;triglycerides
+Burslem et al., (1978); 72;U.S.;F;31 ;80 ; 28.5;43 ;80 ; 32;vegetarian;triglycerides
+Haines et al., (1980); 73;U.K.;M;25 ;106.3 ; 67.3;211 ;148.9 ; 103.6;vegetarian;triglycerides
+Haines et al., (1980); 73;U.K.;F;25 ;81.5 ; 46.9;71 ;108.10; 54;vegetarian;triglycerides
+Huijbregts et al., (1980); 74;The Netherlands;M/F;7 ;93.9 ; 33.7;7 ;106.3 ; 24.9;vegetarian;triglycerides
+Lock et al., (1982); 76;U.S.;M;8 ;57 ; 7;10 ;154 ; 15;vegetarian;triglycerides
+Lock et al., (1982); 76;U.S.;F;28 ;53 ; 3;26 ;82 ; 5;vegetarian;triglycerides
+Liebman et al., (1983); 77;U.S.;M;36 ;79 ; 54;18 ;98 ; 59;vegetarian;triglycerides
+Kritchevsky et al., (1984); 78;U.S.;M/F;25 ;174 ; 16.5;25 ;138 ; 13.9;vegetarian;triglycerides
+Fisher et al., (1986); 79;U.S.;M/F;25 ;97.9 ; 27.9;25 ;94.0 ; 57.2;vegetarian;triglycerides
+Faber et al., (1986); 5;South Africa;M;14 ;153.2 ; 36.1;10 ;161.7 ; 46.9;vegetarian;triglycerides
+Faber et al., (1986); 5;South Africa;F;19 ;139.1 ; 29.3;12 ;131.7 ; 41.6;vegetarian;triglycerides
+Nieman et al., (1989); 7;U.S.;F;19 ;124 ; 15.1;12 ;117.8 ; 15.9;vegetarian;triglycerides
+Nieman et al., (1989); 8;U.S.;F;23 ;126.7 ; 14.2;13 ;117.8 ; 14.2;vegetarian;triglycerides
+Reddy et al., (1992); 10;U.K.;F;40 ;82.38 ; 7.1;22 ;86.8 ; 9.7;vegetarian;triglycerides
+Supawan et al., (1992); 11;Thailand;M;69 ;71.5 ; 2.2;32 ;78.0 ; 2.8;vegetarian;triglycerides
+Supawan et al., (1992); 11;Thailand;F;68 ;62.0 ; 1.7;36 ;59.0 ; 2.1;vegetarian;triglycerides
+Ho et al., (1993); 82;China;M/F;15 ;115.1 ; 70.9;20 ;88.6 ; 26.6;vegetarian;triglycerides
+Pan et al., (1993); 13;Taiwan;M;23 ;68.2 ; 21.3;20 ;66.4 ; 17.7;vegetarian;triglycerides
+Pan et al., (1993); 13;Taiwan;F;32 ;50.5 ; 22.1;38 ;54.9 ; 23.9;vegetarian;triglycerides
+Melby et al., (1994); 14;U.S.;M/F;66 ;97.4 ; 8.9;45 ;132.9 ; 8.9;vegetarian;triglycerides
+Krajcovicova et al., (1994); 15;Slovak Rep.;M;31 ;83.3 ; 3.5;24 ;127.6 ; 5.3;vegetarian;triglycerides
+Krajcovicova et al., (1994); 15;Slovak Rep.;F;28 ;78.8 ; 2.7;26 ;116.9 ; 4.4;vegetarian;triglycerides
+Krajcovicova et al., (1996); 17;Slovak Rep.;M;42 ;85.0 ; 4.4;29 ;155.9 ; 10.6;vegetarian;triglycerides
+Krajcovicova et al., (1996); 17;Slovak Rep.;F;39 ;81.5 ; 3.5;33 ;139.9 ; 9.7;vegetarian;triglycerides
+Williams et al., (1997); 18;U.S.;M;199 ;111.6 ; 62.9;7054 ;102.7 ; 63.8;vegetarian;triglycerides
+Williams et al., (1997); 18;U.S.;F;152 ;82.4 ; 44.3;1837 ;81.5 ; 55.8;vegetarian;triglycerides
+Woo et al., (1998); 83;China;F;106 ;139.9 ; 118.7;53 ;148.8 ; 105.4;vegetarian;triglycerides
+Harman et al., (1998); 19;New Zealand;M;12 ;106.3 ; 44.3;11 ;106.3 ; 35.4;vegetarian;triglycerides
+Harman et al., (1998); 19;New Zealand;F;12 ;88.6 ; 26.6;12 ;97.4 ; 35.4;vegetarian;triglycerides
+Li et al., (1999); 84;Australia;F;50 ;80.6 ; 35.5;24 ;91.2 ; 32.8;vegetarian;triglycerides
+Korpela et al., (1999); 21;Finland;M/F;11 ;102.7 ; 47;7 ;89.5 ; 42.5;vegetarian;triglycerides
+Lee et al., (2000); 23;China;M/F;60 ;100.1 ; 5;133 ;93 ; 51.4;vegetarian;triglycerides
+Kwok et al., (2000); 24;China;F;90 ;141.7 ; 124;90 ;150.6 ; 97.4;vegetarian;triglycerides
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;54 ;107.2 ; 2.7;59 ;147.0 ; 2.7;vegetarian;triglycerides
+Lu et al., (2000); 26;Taiwan;M;26 ;86.8 ; 54.0;26 ;93.9 ; 39.9;vegetarian;triglycerides
+Lu et al., (2000); 26;Taiwan;F 1;29 ;70.9 ; 31;27 ;84.1 ; 27.5;vegetarian;triglycerides
+Lu et al., (2000); 26;Taiwan;F 2;55 ;66.4 ; 26.6;60 ;96.5 ; 62;vegetarian;triglycerides
+Lin et al., (2001); 27;Taiwan;M/F;20 ;94 ; 33;20 ;100 ; 51;vegetarian;triglycerides
+Szeto et al., (2004); 85;China;M/F;30 ;93.9 ; 39.9;30 ;119.6 ; 50.5;vegetarian;triglycerides
+Kwok et al., (2005); 29;China;M/F;49 ;124 ; 124;49 ;79.7 ; 35.4;vegetarian;triglycerides
+Su et al., (2006); 33;Taiwan;F;57 ;124 ; 62;61 ;115.1 ; 53.1;vegetarian;triglycerides
+Fu et al., (2006); 35;Taiwan;F;35 ;63 ; 6;35 ;93 ; 9;vegetarian;triglycerides
+De Biase et al., (2007); 36;Brazil;M/F;19 ;94 ; 33.4;22 ;155.7 ; 119.8;vegetarian;triglycerides
+Teixeira et al., (2007); 37;Brazil;M/F;67 ;113 ; 79;134 ;156 ; 127;vegetarian;triglycerides
+Yen et al., (2008); 38;Taiwan;M/F;21 ;103.7 ; 67.9;28 ;165.0 ; 247.1;vegetarian;triglycerides
+Fu et al., (2008); 39;Taiwan;F;35 ;63.1 ; 6.2;35 ;93.1 ; 8.4;vegetarian;triglycerides
+Chen et al., (2008); 41;Taiwan;M/F;99 ;95.9 ; 65.5;99 ;102.7 ; 78.9;vegetarian;triglycerides
+Pitla et al., (2009); 43;India;M;14 ;150.6 ; 62;15 ;124 ; 39.9;vegetarian;triglycerides
+Pitla et al., (2009); 43;India;F;12 ;106.3 ; 43.4;11 ;88.6 ; 18.6;vegetarian;triglycerides
+Sambol et al., (2009); 44;Croatia;M/F;30 ;82.4 ; 35.4;50 ;122.2 ; 53.1;vegetarian;triglycerides
+Lin et al., (2010); 45;Taiwan;M/F;102 ;123.7 ; 78.5;102 ;104.2 ; 70.4;vegetarian;triglycerides
+Yang et al., (2011); 49;China;M;171 ;100.1 ; 60.2;129 ;122.3 ; 77.1;vegetarian;triglycerides
+Chen et al., (2011); 50;Taiwan;F;173 ;96.9 ; 59.6;190 ;84.7 ; 43.2;vegetarian;triglycerides
+Fernandes-Dourado et al., (2011); 86;Brazil;M/F;29 ;150.3 ; 86.9;58 ;115.9 ; 35.6;vegetarian;triglycerides
+Stephens et al., (2011); 51;U.S.;M/F;11 ;70.9 ; 8.9;14 ;79.7 ; 17.7;vegetarian;triglycerides
+Kim et al., (2012); 54;Rep. of Korea;M/F;45 ;132.4 ; 80;30 ;111.1 ; 53.4;vegetarian;triglycerides
+Kim et al., (2012); 55;Rep. of Korea;F;59 ;144.7 ; 71.1;48 ;158.29 ; 94.9;vegetarian;triglycerides
+Ingenbleek et al., (2012); 56;France;M;24 ;75.3 ; 48.7;15 ;95.7 ; 36.3;vegetarian;triglycerides
+Huang et al., (2012); 57;China;M;103 ;135.5 ; 74.4;128 ;175.4 ; 97.4;vegetarian;triglycerides
+Zhang et al., (2013); 59;China;M;170 ;106.3 ; 78.3;126 ;136.5 ; 132.8;vegetarian;triglycerides
+Jung et al., (2013); 62;Rep. of Korea;M;148 ;142.1 ; 93.4;148 ;141.1 ; 76.2;vegetarian;triglycerides
+Chiang et al., (2013); 63;Taiwan;F;391 ;108.1 ; 68.2;315 ;106.3 ; 60.2;vegetarian;triglycerides
+Huang et al., (2014); 88;Taiwan;F;76 ;103.4 ; 42.3;2285 ;97.6 ; 59.1;vegetarian;triglycerides
+Huang et al., (2014); 88;Taiwan;F;51 ;162.2 ; 103.6;1040 ;141.1 ; 84.5;vegetarian;triglycerides
+Jian et al., (2014); 89;Taiwan;M;68 ;136.8 ; 71;3144 ;141.6 ; 95.1;vegetarian;triglycerides
+Jian et al., (2014); 89;Taiwan;F;127 ;126.1 ; 77.4;3325 ;111.0 ; 70.9;vegetarian;triglycerides
+Vinagre et al., (2014); 67;Brazil;M/F;18 ;103.6 ; 26.6;29 ;87.7 ; 43.4;vegetarian;triglycerides
+Nieman et al., (1989); 7;U.S.;F;19 ;82.8 ; 16.2;12 ;92.34; 2;vegetarian;blood_glucose
+Nieman et al., (1989); 8;U.S.;F;23 ;83.7 ; 16.2;13 ;93.24 ; 2;vegetarian;blood_glucose
+Ho et al., (1993); 82;China;M/F;15 ;93.6 ; 16.2;20 ;88.2 ; 5.4;vegetarian;blood_glucose
+Pan et al., (1993); 13;Taiwan;M;23 ;82 ; 8;20 ;79 ; 4;vegetarian;blood_glucose
+Pan et al., (1993); 13;Taiwan;F;32 ;69 ; 9;38 ;79 ; 6;vegetarian;blood_glucose
+Melby et al., (1994); 14;U.S.;M/F;66 ;93.6 ; 5.4;45 ;100.8 ; 9;vegetarian;blood_glucose
+Lin et al., (2001); 27;Taiwan;M/F;20 ;87 ; 8;20 ;98 ; 14;vegetarian;blood_glucose
+Kwok et al., (2005); 29;China;M/F;49 ;86.4 ; 10.8;49 ;99 ; 34.2;vegetarian;blood_glucose
+Valachovicova et al., (2006); 32;Slovak Rep.;M/F;95 ;80.46 ; 0.9;107 ;84.78 ; 1.3;vegetarian;blood_glucose
+Su et al., (2006); 33;Taiwan;F;57 ;90 ; 9;61 ;93.6 ; 9;vegetarian;blood_glucose
+Hung et al., (2006); 34;Taiwan;F;49 ;84.6 ; 0.9;49 ;88.2 ; 0.9;vegetarian;blood_glucose
+Fu et al., (2006); 35;Taiwan;F;35 ;88 ; 1;35 ;94 ; 2;vegetarian;blood_glucose
+Teixeira et al., (2007); 37;Brazil;M/F;67 ;82 ; 10;134 ;108 ; 37;vegetarian;blood_glucose
+Fu et al., (2008); 39;Taiwan;F;35 ;87.8 ; 1.4;35 ;94.0 ; 1.7;vegetarian;blood_glucose
+Slavicek et al., (2008); 40;Czech Rep.;M/F;195 ;71.8 ; 18;201 ;76.86 ; 16.2;vegetarian;blood_glucose
+Chen et al., (2008); 41;Taiwan;M/F;99 ;89.9 ; 10.7;99 ;90.22 ; 16.0;vegetarian;blood_glucose
+Sambol et al., (2009); 44;Croatia;M/F;30 ;88.0 ; 12.6;50 ;85.86 ; 10.8;vegetarian;blood_glucose
+Lin et al., (2010); 45;Taiwan;M/F;102 ;76.6 ; 28.2;102 ;88.6 ; 21.4;vegetarian;blood_glucose
+Yang et al., (2011); 49;China;M;171 ;85 ; 12.2;129 ;90.54 ; 10.4;vegetarian;blood_glucose
+Su et al., (2011); 91;Taiwan;M/F;49 ;90 ; 9;41 ;93.6 ; 9;vegetarian;blood_glucose
+Chen et al., (2011); 50;Taiwan;F;173 ;84.8 ; 8.1;190 ;87.45 ; 9.6;vegetarian;blood_glucose
+Kim et al., (2012); 54;Rep. of Korea;M/F;45 ;95.8 ; 7.0;30 ;101.3 ; 7.0;vegetarian;blood_glucose
+Kim et al., (2012); 55;Rep. of Korea;F;59 ;89.8 ; 11.2;48 ;102.13 ; 29.2;vegetarian;blood_glucose
+Huang et al., (2012); 57;China;M;103 ;88.6 ; 21.8;128 ;96.48 ; 16.0;vegetarian;blood_glucose
+Zhang et al., (2013); 59;China;M;170 ;87.7 ; 37.3;126 ;91.08 ; 12.4;vegetarian;blood_glucose
+Farzana et al., (2013); 61;Bangladesh;M/F;66 ;103.86 ; 20.7;66 ;107.1 ; 35.3;vegetarian;blood_glucose
+Chiang et al., (2013); 63;Taiwan;F;391 ;89.64 ; 16.0;315 ;92.7 ; 17.5;vegetarian;blood_glucose
+Vinagre et al., (2014); 67;Brazil;M/F;18 ;74 ; 18;29 ;83 ; 7;vegetarian;blood_glucose
+Sanders et al., (1987); 92 ;U.K.;M;11 ;21.1 ; 0.5;11 ;21.8 ; 0.4;vegan;bmi
+Sanders et al., (1987); 92;U.K.;F;11 ;20.6 ; 0.5;11 ;20.6 ; 0.5;vegan;bmi
+Thorogood et al., (1990); 9;U.K.;M;26 ;22.3 ; 0.1;26 ;23.1 ; 0.1;vegan;bmi
+Thorogood et al., (1990); 9;U.K.;F;26 ;21.7 ; 0.1;26 ;22.7 ; 0.1;vegan;bmi
+Sanders et al., (1992); 93;U.K.;M;10 ;22.7 ; 1.;10 ;22.7 ; 0.5;vegan;bmi
+Sanders et al., (1992); 93;U.K.;F;10 ;21.6 ; 0.6;10 ;20.7 ; 0.5;vegan;bmi
+Agren et al., (1995); 94;Finland;M/F;8 ;19.5 ; 1.2;11 ;23.8 ; 4.0;vegan;bmi
+Thomas et al., (1999); 22;U.K.;F;143 ;22.5 ; 0.7;376 ;24 ; 0.6;vegan;bmi
+Haddad et al., (1999); 95;U.S.;M/F;25 ;20.5 ; 2.5;20 ;25.5 ; 3.1;vegan;bmi
+Fokkema et al., (2000); 96;Netherland;M;8 ;20.6 ; 2.3;9 ;23.8 ; 2.4;vegan;bmi
+Fokkema et al., (2000); 96;Netherland;F;4 ;20.6 ; 1.7;6 ;20.4 ; 1.9;vegan;bmi
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;32 ;21.4 ; 0.4;59 ;24.2 ; 0.3;vegan;bmi
+Newby et al., (2005); 31;Sweden;F;83 ;23.3 ; 3.8;54 ;24.7 ; 3.9;vegan;bmi
+Goff et al., (2005); 97;U.K.;M/F;21 ;22.7 ; 2.4;25 ;23.4 ; 2.8;vegan;bmi
+De Biase et al., (2007); 36;Brazil;M/F;18 ;22 ; 1.3;22 ;25.4 ; 5.2;vegan;bmi
+Fontana et al., (2007); 98;U.S.;M/F;21 ;21.3 ; 3.1;21 ;21.1 ; 1.6;vegan;bmi
+Sambol et al., (2009); 44;Croatia;M/F;20 ;22.2 ; 2.7;50 ;23.3 ; 2.7;vegan;bmi
+Pettersen et al., (2012); 53;U.S.;M/F;49 ;24.0 ; 5.9;198 ;29.5 ; 6.6;vegan;bmi
+Timko et al., (2012); 58;U.S.;M/F;35 ;21.3 ; 3.8;265 ;24.5 ; 5.3;vegan;bmi
+Vinagre et al., (2013); 99;Brazil;M/F;21 ;22.7 ; 2.2;29 ;23.8 ; 2.0;vegan;bmi
+Orlich et al., (2013); 64;U.S.;M/F;5548 ;24.1 ; 4.7;35359 ;28.3 ; 6.1;vegan;bmi
+Key et al., (2014); 68;U.K.;M;862 ;22.4 ; 2.9;8474 ;24.5 ; 3.3;vegan;bmi
+Key et al., (2014); 68;U.K.;F;1384 ;21.8 ; 2.9;24017 ;24.2 ; 4.1;vegan;bmi
+Hardinge et al., (1954); 69;U.S.;M;14 ;206 ; 35.0;15 ;288 ; 49.0;vegan;cholesterol
+Hardinge et al., (1954); 69;U.S.;F;11 ;206 ; 32.7;15 ;295 ; 62.8;vegan;cholesterol
+Sanders et al., (1978); 100;U.K.;M/F;22 ;158.6 ; 6.6;22 ;235.9 ; 7.3;vegan;cholesterol
+Kritchevsky et al., (1984); 78;U.S.;M/F;18 ;192 ; 6.9;25 ;207 ; 6.9;vegan;cholesterol
+Roshanai et al., (1984); 101;U.K.;M;11 ;138.1 ; 8.9;12 ;178.7 ; 9.3;vegan;cholesterol
+Roshanai et al., (1984); 101;U.K.;F;12 ;144.6 ; 8.9;12 ;155.8 ; 10.8;vegan;cholesterol
+Thorogood et al., (1987); 80;U.K.;M/F;114 ;165.9 ; 5.4;1198 ;205.3 ; 38.7;vegan;cholesterol
+Sanders et al., (1987); 92;U.K.;M;11 ;170.2 ; 9.7;11 ;205 ; 7.7;vegan;cholesterol
+Sanders et al., (1987); 92;U.K.;F;11 ;177.9 ; 14.3;11 ;189.5 ; 11.6;vegan;cholesterol
+Thorogood et al., (1990); 9;U.K.;M;26 ;193.3 ; 5.8;26 ;228.2 ; 7;vegan;cholesterol
+Thorogood et al., (1990); 9;U.K.;F;26 ;187.2 ; 6.2;26 ;230.1 ; 7.7;vegan;cholesterol
+Sanders et al., (1992); 93;U.K.;M;10 ;136.1 ; 9.7;10 ;184.5 ; 10.1;vegan;cholesterol
+Sanders et al., (1992); 93;U.K.;F;10 ;144.6 ; 8.9;10 ;162.8 ; 11.6;vegan;cholesterol
+Haddad et al., (1999); 95;U.S.;M/F;25 ;166.3 ; 34.8;20 ;185.6 ; 36.7;vegan;cholesterol
+Thomas et al., (1999); 22;U.K.;F;143 ;156.6 ; 3;376 ;184 ; 3.0;vegan;cholesterol
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;32 ;169.37 ; 2.3;59 ;219.3 ; 1.9;vegan;cholesterol
+Goff et al., (2005); 97;U.K.;M/F;21 ;144.2 ; 27.8;25 ;161.6 ; 36.4;vegan;cholesterol
+De Biase et al., (2007); 36;Brazil;M/F;18 ;141.1 ; 30.6;22 ;208.1 ; 49.1;vegan;cholesterol
+Fontana et al., (2007); 98;U.S.;M/F;21 ;143 ; 23;21 ;187 ; 33;vegan;cholesterol
+Sambol et al., (2009); 44;Croatia;M/F;20 ;162 ; 27.1;50 ;189.1 ; 23.2;vegan;cholesterol
+Vinagre et al., (2013); 99;Brazil;M/F;21 ;139.2 ; 34.8;29 ;166.3 ; 27.1;vegan;cholesterol
+Bradbury et al., (2014); 87;U.K.;M;167 ;170.5 ; 1.3;168 ;204.2 ; 1.3;vegan;cholesterol
+Bradbury et al., (2014); 87;U.K.;F;255 ;172.1 ; 1.1;256 ;195.3 ; 1.1;vegan;cholesterol
+Huang et al., (2014); 88;Taiwan;F;36 ;173.4 ; 32.5;2285 ;175.2 ; 33.2;vegan;cholesterol
+Huang et al., (2014); 88;Taiwan;F;63 ;191.3 ; 35.4;1040 ;204.8 ; 38.3;vegan;cholesterol
+Jian et al., (2014); 89;Taiwan;M;45 ;164.2 ; 36.1;3144 ;181.7 ; 35.9;vegan;cholesterol
+Jian et al., (2014); 89;Taiwan;F;99 ;184.7 ; 35.2;3325 ;184.3 ; 37.4;vegan;cholesterol
+Roshanai et al., (1984); 101;U.K.;M;11 ;73.9 ; 7.7;12 ;116.4 ; 8.5;vegan;ldl_cholesterol
+Roshanai et al., (1984); 101;U.K.;F;12 ;78.1 ; 7;12 ;85.5 ; 9.3;vegan;ldl_cholesterol
+Thorogood et al., (1987); 92;U.K.;M/F;114 ;88.2 ; 4.9;1198 ;122.6 ; 3.5;vegan;ldl_cholesterol
+Thorogood et al., (1990); 9;U.K.;M;26 ;136.1 ; 8.1;26 ;136.1 ; 8.1;vegan;ldl_cholesterol
+Thorogood et al., (1990); 9;U.K.;F;26 ;105.2 ; 5.0;26 ;146.6 ; 7;vegan;ldl_cholesterol
+Sanders et al., (1992); 93;U.K.;M;10 ;71.5 ; 8.1;10 ;121.4 ; 9.1;vegan;ldl_cholesterol
+Sanders et al., (1992); 93;U.K.;F;10 ;78.1 ; 7;10 ;90.49 ; 10.0;vegan;ldl_cholesterol
+Thomas et al., (1999); 22;U.K.;F;143 ;93.2 ; 2.6;376 ;119.9 ; 2.8;vegan;ldl_cholesterol
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;32 ;89.7 ; 1.2;59 ;139.6 ; 1.6;vegan;ldl_cholesterol
+Goff et al., (2005); 97;U.K.;M/F;21 ;87.0 ; 23.2;25 ;88.9 ; 37.1;vegan;ldl_cholesterol
+De Biase et al., (2007); 36;Brazil;M/F;18 ;69.3 ; 29.5;22 ;123.4 ; 42.7;vegan;ldl_cholesterol
+Fontana et al., (2007); 98;U.S.;M/F;21 ;76 ; 23;21 ;112 ; 29;vegan;ldl_cholesterol
+Sambol et al., (2009); 44;Croatia;M/F;20 ;90.1 ; 23.2;50 ;114.9 ; 23.2;vegan;ldl_cholesterol
+Vinagre et al., (2013); 99;Brazil;M/F;21 ;81.2 ; 30.9;29 ;104.4 ; 27.1;vegan;ldl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;36 ;111.3 ; 26.8;2285 ;107.7 ; 24.1;vegan;ldl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;63 ;121.4 ; 28.9;1040 ;129.3 ; 27.4;vegan;ldl_cholesterol
+Jian et al., (2014); 89;Taiwan;M;45 ;104.6 ; 25.8;3144 ;116.4 ; 26.7;vegan;ldl_cholesterol
+Jian et al., (2014); 89;Taiwan;F;99 ;117.7 ; 28.4;3325 ;114.4 ; 27.1;vegan;ldl_cholesterol
+Roshanai et al., (1984); 101;U.K.;M;11 ;51.4 ; 1.2;12 ;51.0 ; 2.7;vegan;hdl_cholesterol
+Roshanai et al., (1984); 101;U.K.;F;12 ;56.1 ; 3.1;12 ;57.6 ; 2.7;vegan;hdl_cholesterol
+Thorogood et al., (1987); 80;U.K.;M/F;114 ;57.6 ; 1.9;1198 ;57.6 ; 1.35;vegan;hdl_cholesterol
+Thorogood et al., (1990); 9;U.K.;M;26 ;60.3 ; 1.9;26 ;60.3 ; 2.7;vegan;hdl_cholesterol
+Thorogood et al., (1990); 9;U.K.;F;26 ;62.7 ; 2.3;26 ;66.9 ; 3.1;vegan;hdl_cholesterol
+Sanders et al., (1992); 93;U.K.;M;10 ;50.7 ; 1.6;10 ;51.82 ; 3.5;vegan;hdl_cholesterol
+Sanders et al., (1992); 93;U.K.;F;10 ;56.1 ; 3.1;10 ;59.2 ; 3.1;vegan;hdl_cholesterol
+Haddad et al., (1999); 95;U.S.;M/F;25 ;46.4 ; 11.6;20 ;58.0 ; 15.5;vegan;hdl_cholesterol
+Thomas et al., (1999); 22;U.K.;F;143 ;50.3 ; 1.1;376 ;49.9 ; 0.9;vegan;hdl_cholesterol
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;32 ;57.2 ; 1.2;59 ;50.7 ; 1.2;vegan;hdl_cholesterol
+Goff et al., (2005); 97;U.K.;M/F;21 ;47.2 ; 9.7;25 ;51.0 ; 15.9;vegan;hdl_cholesterol
+De Biase et al., (2007); 36;Brazil;M/F;18 ;55.7 ; 13.9;22 ;56.2 ; 18.3;vegan;hdl_cholesterol
+Fontana et al., (2007); 98;U.S.;M/F;21 ;56 ; 13;21 ;52 ; 11;vegan;hdl_cholesterol
+Sambol et al., (2009); 44;Croatia;M/F;20 ;53 ; 15.5;50 ;44.5 ; 19.3;vegan;hdl_cholesterol
+Vinagre et al., (2013); 99;Brazil;M/F;21 ;38.7 ; 7.7;29 ;42.5 ; 11.6;vegan;hdl_cholesterol
+Bradbury et al., (2014); 87;U.K.;M;167 ;44.5 ; 0.8;168 ;44.9 ; 0.8;vegan;hdl_cholesterol
+Bradbury et al., (2014); 87;U.K.;F;255 ;53.4 ; 0.7;256 ;57.2 ; 0.7;vegan;hdl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;36 ;52.3 ; 12.4;2285 ;58.5 ; 13.2;vegan;hdl_cholesterol
+Huang et al., (2014); 88;Taiwan;F;63 ;56.5 ; 11.6;1040 ;61.0 ; 16.1;vegan;hdl_cholesterol
+Jian et al., (2014); 89;Taiwan;M;45 ;45.8 ; 15;3144 ;51.6 ; 14.5;vegan;hdl_cholesterol
+Jian et al., (2014); 89;Taiwan;F;99 ;54.9 ; 12;3325 ;59.3 ; 14.2;vegan;hdl_cholesterol
+Sanders et al., (1978); 100;U.K.;M/F;21 ;84.1 ; 6.2;21 ;119.6 ; 12.4;vegan;triglycerides
+Kritchevsky et al., (1984); 78;U.S.;M/F;18 ;142 ; 13.9;25 ;138 ; 13.9;vegan;triglycerides
+Roshanai et al., (1984); 101;U.K.;M;11 ;63.8 ; 6.2;12 ;56.7 ; 4.4;vegan;triglycerides
+Roshanai et al., (1984); 101;U.K.;F;12 ;53.2 ; 7.1;12 ;64.7 ; 9.7;vegan;triglycerides
+Sanders et al., (1992); 93;U.K.;M;10 ;67.3 ; 6.2;10 ;57.6 ; 5.3;vegan;triglycerides
+Sanders et al., (1992); 93;U.K.;F;10 ;53.1 ; 7.1;10 ;67.3 ; 21.2;vegan;triglycerides
+Haddad et al., (1999); 95;U.S.;M/F;25 ;88.6 ; 35.4;20 ;106.3 ; 53.1;vegan;triglycerides
+Krajcovicova et al., (2000); 25;Slovak Rep.;M/F;32 ;115.1 ; 2.7;59 ;147.0 ; 2.7;vegan;triglycerides
+Goff et al., (2005); 97;U.K.;M/F;21 ;73.3 ; 6.7;25 ;104.5 ; 5.5;vegan;triglycerides
+De Biase et al., (2007); 36;Brazil;M/F;18 ;81.7 ; 81.9;22 ;155.7 ; 119.8;vegan;triglycerides
+Fontana et al., (2007); 98;U.S.;M/F;21 ;56 ; 37;21 ;120 ; 59;vegan;triglycerides
+Sambol et al., (2009); 44;Croatia;M/F;20 ;83.3 ; 35.4;50 ;122.2 ; 53.1;vegan;triglycerides
+Vinagre et al., (2013); 99;Brazil;M/F;21 ;79.8 ; 35.4;29 ;88.6 ; 35.4;vegan;triglycerides
+Huang et al., (2014); 88;Taiwan;F;36 ;126.3 ; 69.2;2285 ;97.6 ; 59.1;vegan;triglycerides
+Huang et al., (2014); 88;Taiwan;F;63 ;140.8 ; 65.2;1040 ;141.1 ; 84.5;vegan;triglycerides
+Jian et al., (2014); 89;Taiwan;M;45 ;156.6 ; 104.9;3144 ;141.6 ; 95.1;vegan;triglycerides
+Jian et al., (2014); 89;Taiwan;F;99 ;135.4 ; 66.7;3325 ;111.0 ; 70.9;vegan;triglycerides
+Goff et al., (2005); 97;U.K.;M/F;21 ;71.3 ; 2.8;25 ;73 ; 2.6;vegan;blood_glucose
+Fontana et al., (2007); 98;U.S.;M/F;21 ;85 ; 7;21 ;95 ; 6;vegan;blood_glucose
+Sambol et al., (2009); 44;Croatia;M/F;20 ;85.1 ; 12.6;50 ;85.86 ; 10.8;vegan;blood_glucose
+Vinagre et al., (2013); 99;Brazil;M/F;21 ;68.4 ; 16.2;29 ;82.8 ; 5.4;vegan;blood_glucose

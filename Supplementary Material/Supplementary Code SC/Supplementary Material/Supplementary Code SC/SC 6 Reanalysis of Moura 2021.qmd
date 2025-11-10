@@ -1,0 +1,535 @@
+---
+title: "Reanalysing Moura et al. (2021)"
+author: ""
+format: pdf
+editor: visual
+root.dir: ""
+---
+
+```{r}
+#| echo: false
+library(knitr)
+opts_chunk$set(fig.path='figure/', fig.align='center', fig.width=8, fig.height=8, fig.show='hold', cache=TRUE, tidy=F, tidy.opts=list(width.cutoff=60), size="small")
+```
+
+# 1. Data preparation
+
+```{r}
+#| label: moura_data_prep
+#| warning: false
+library(metadat)
+library(ape)
+library(dplyr)
+library(officer)
+library(stringr)
+library(psychometric)
+X <- dat.moura2021$dat
+tree <- dat.moura2021$tree
+tree <- compute.brlen(tree)
+A <- vcv(tree, corr = T)
+X$species.id.phy <- X$species.id
+
+moura_ref <- docx_summary(read_docx("../Supplementary Data SD/SD 6.1 moura2021_ref.docx"))$text
+moura_ref <- sapply(moura_ref, function(x) strsplit(x, "\\(")[[1]][1])
+moura_ref[1] <- "Adams, J., Edwards, A.J. & Emberton, H."
+moura_ref <- gsub("&", ",", moura_ref)
+moura_ref <- gsub(" ", "", moura_ref)
+moura_ref <- gsub("\\.", "", moura_ref)
+
+moura_authors <- read.table(text = moura_ref, sep = ",", quote = "", fill = T, col.names = 1:22)
+moura_authors[409, 2] <- "WE"
+moura_authors[409, 3] <- "Sullivan"
+moura_authors[409, 4] <- "BK"
+moura_authors[409, 5] <- ""
+
+test <- data.frame(matrix(nrow = 457))
+test$first <- paste(moura_authors$X1, moura_authors$X2)
+test$second <- paste(moura_authors$X3, moura_authors$X4)
+test$third <- paste(moura_authors$X5, moura_authors$X6)
+test$fourth <- paste(moura_authors$X7, moura_authors$X8)
+test$fifth <- paste(moura_authors$X9, moura_authors$X10)
+test$sixth <- paste(moura_authors$X11, moura_authors$X12)
+test$seventh <- paste(moura_authors$X13, moura_authors$X14)
+test$eighth <- paste(moura_authors$X15, moura_authors$X16)
+test$ninth <- paste(moura_authors$X17, moura_authors$X18)
+test$tenth <- paste(moura_authors$X19, moura_authors$X20)
+test$eleventh <- paste(moura_authors$X21, moura_authors$X22)
+test <- test[, -1]
+
+moura_authors <- paste(test$first, test$second, test$third, test$fourth, test$fifth, sep = ",")
+moura_authors <- gsub(" ", "", moura_authors)
+moura_authors <- gsub(",,+", "", moura_authors)
+moura_authors <- gsub("Beeching SC", "Beeching S", moura_authors)
+moura_authors <- gsub("Bradbury JW", "Bradbury J", moura_authors)
+moura_authors <- gsub("Dechaume-Moncharmont F-X", "Dechaume-Moncharmont FX", moura_authors)
+moura_authors <- gsub("Eaves L J", "Eaves L", moura_authors)
+moura_authors <- gsub("Hernández J E", "Hernandez J E", moura_authors)
+moura_authors <- gsub("Iribarne O O", "Iribarne O", moura_authors)
+moura_authors <- gsub("Kekić V", "Kekic V", moura_authors)
+moura_authors <- gsub("Lee J C", "Lee J", moura_authors)
+moura_authors <- gsub("Liao W B", "Liao W", moura_authors)
+moura_authors <- gsub("Márquez R", "Marquez R", moura_authors)
+moura_authors <- gsub("Merilä J", "Merila J", moura_authors)
+moura_authors <- gsub("Nagoshi C T", "Nagoshi C", moura_authors)
+moura_authors <- gsub("Nava C P", "Nava C", moura_authors)
+moura_authors <- gsub("Neale M C", "Neale M", moura_authors)
+moura_authors <- gsub("Neves V C", "Neves V", moura_authors)
+moura_authors <- gsub("Pavković-Lučić S", "Pavkovic-Lucic S", moura_authors)
+moura_authors <- gsub("Santos M R", "Santos M", moura_authors)
+moura_authors <- gsub("Smith M D", "Smith M", moura_authors)
+moura_authors <- gsub("Yu T L", "Yu T", moura_authors)
+moura_authors <- gsub("Hegde S N", "Hedge S N", moura_authors)
+moura_authors <- gsub("Willams D D", "Williams D D", moura_authors)
+moura_authors <- gsub("Li X", "Lii X", moura_authors)
+moura_authors <- gsub("Côte", "Cote", moura_authors)
+
+moura_authors <- moura_authors[order(moura_authors)]
+which(grepl("Price RA,Vandenberg SG", moura_authors))
+which(grepl("Price RA,Reed DR,Guido NJ", moura_authors))
+moura_authors[323] <- "Price RA,Vandenberg SG"
+moura_authors[324] <- "Price RA,Reed DR,Guido NJ"
+
+which(grepl("Sharma K,Byard PJ,Russell JM,Rao DC", moura_authors))
+which(grepl("Sharma K,Sharma JC", moura_authors))
+moura_authors[362] <- "Sharma K,Sharma JC"
+moura_authors[363] <- "Sharma K,Byard PJ,Russell JM,Rao DC"
+
+X$study.id <- gsub("C\\?te", "Cote", X$study.id)
+
+moura_author_list <- unique(unlist((strsplit(moura_authors, "\\,"))))
+#sort(moura_author_list)
+
+X_author_list <- moura_author_list
+
+X <- X %>% mutate(study_id = dense_rank(study.id))
+X$study_id <- as.factor(X$study_id)
+X <- X[order(X$study_id), ]
+X$authors <- strsplit(moura_authors, "\\,")[X$study_id]
+```
+
+# 2. Networks
+
+## 2.1. Bipartite edges
+
+```{r}
+#| label: moura_bipartite_edges
+X_studies <- X[!duplicated(X$study_id), ]
+X_bipartite_edges <- lapply(X_studies$authors, function(x){X_author_list %in% x})
+X_bipartite_edges <- do.call("cbind", X_bipartite_edges)
+rownames(X_bipartite_edges) <- X_author_list
+```
+
+## 2.2. Co-author overlap network
+
+```{r}
+#| label: moura_coauthor_overlap_network
+#| warning: false
+library(statnet)
+X_shared_authors <- t(X_bipartite_edges) %*% X_bipartite_edges
+X_network <- as.network(X_shared_authors, directed = F)
+par(mar = c(0,0,0,0))
+plot.network(X_network, edge.col = "black",
+             edge.lwd = X_shared_authors)
+X_geo.dist <- geodist(X_network)
+```
+
+# 3. Analysis
+
+## 3.1. Effect sizes
+
+```{r}
+#| label: moura_effect_sizes
+#| warning: false
+library(metafor)
+library(dplyr)
+X_effect <- escalc(measure = "ZCOR", ri = ri, ni = ni, data = X)
+```
+
+## 3.2. Correlogram
+
+```{r}
+#| label: moura_correlogram
+X_effect_dist_mat <- as.matrix(stats::dist(X_effect$yi))
+X_effect_sim_mat <- 1 - (X_effect_dist_mat/max(X_effect_dist_mat))
+X_geo_dist_mat <- X_geo.dist$gdist
+colnames(X_geo_dist_mat) <- 1:ncol(X_geo_dist_mat)
+effects_per_study <- X_effect %>% group_by(study_id) %>% count()
+
+geo_dist_vec <- vector()
+for(i in 1:length(unique(X$study_id))){
+  geo_dist_vec <- c(geo_dist_vec, rep(rep(X_geo_dist_mat[i, ],
+                                          times = effects_per_study$n),
+                                      times = effects_per_study$n[i]))
+}
+X_geo_dist_mat_full <- matrix(data = geo_dist_vec, ncol = nrow(X_effect),
+                              nrow = nrow(X_effect))
+colnames(X_geo_dist_mat_full) <- 1:ncol(X_geo_dist_mat_full)
+
+X_mantel_corlog <- ncf::mantel.correlog(X_geo_dist_mat_full, X_effect_sim_mat,
+                                      increment = 1, resamp = 1)
+plot(X_mantel_corlog)
+tail(X_mantel_corlog$correlation, n = 1)
+```
+
+## 3.3. Similarity matrices
+
+### 3.3.1. Inv.geo
+
+```{r}
+#| label: moura_similarity_matrix_invgeo
+X_inv.geo <- 1 - tail(X_mantel_corlog$correlation, n = 1) *
+  X_geo.dist$gdist / max(X_geo.dist$gdist[which(is.finite(X_geo.dist$gdist))])
+X_inv.geo[X_inv.geo == -Inf] <- 0
+hist(X_inv.geo[X_inv.geo > 0], main = "inv.geo values > 0")
+```
+
+### 3.3.2. Jaccard
+
+```{r}
+#| label: moura_similarity_matrix_jaccard
+jaccard <- function(a, b){
+    intersection = length(intersect(a, b))
+    union = length(a) + length(b) - intersection
+    return(intersection/union)
+}
+
+X_jaccard_matrix <- matrix(data = NA, ncol = length(unique(X$study_id)),
+                           nrow = length(unique(X$study_id)))
+for(i in 1:length(unique(X$study_id))){
+  for(j in 1:length(unique(X$study_id))){
+    X_jaccard_matrix[i, j] <- jaccard(X_studies$authors[[i]], X_studies$authors[[j]])
+  }
+}
+colnames(X_jaccard_matrix) <- 1:ncol(X_jaccard_matrix)
+hist(X_jaccard_matrix[X_jaccard_matrix > 0], main = "Jaccard values > 0")
+```
+
+```{r}
+#| label: moura_similarity_matrix_jaccard_correlogram
+jaccard_vec <- vector()
+for(i in 1:length(unique(X$study_id))){
+  jaccard_vec <- c(jaccard_vec, rep(rep(X_jaccard_matrix[i, ],
+                                          times = effects_per_study$n),
+                                      times = effects_per_study$n[i]))
+}
+X_jaccard_mat_full <- matrix(data = jaccard_vec, ncol = nrow(X_effect),
+                             nrow = nrow(X_effect))
+colnames(X_jaccard_mat_full) <- 1:ncol(X_jaccard_mat_full)
+
+X_mantel_corlog_jaccard <- ncf::mantel.correlog(X_jaccard_mat_full, X_effect_sim_mat,
+                                      increment = .1, resamp = 1)
+plot(X_mantel_corlog_jaccard)
+head(X_mantel_corlog_jaccard$correlation, n = 1)
+```
+
+### 3.3.3. Inv.geo + Jaccard
+
+```{r}
+#| label: moura_similarity_matrix_invgeo_jaccard
+X_invgeo_jaccard <- X_inv.geo + X_jaccard_matrix
+colnames(X_invgeo_jaccard) <- 1:ncol(X_invgeo_jaccard)
+hist(X_invgeo_jaccard[X_invgeo_jaccard > 0],
+     main = "Combination of inv.geo and jaccard > 0")
+```
+
+## 3.4. RMA
+
+### 3.4.1. Preparation
+
+```{r}
+#| label: moura_rma
+#| warning: false
+library(dplyr)
+colnames(X_inv.geo) <- 1:ncol(X_inv.geo)
+X_effect$study_id.phyl <- X_effect$study_id
+X_effect <- X_effect[order(X_effect$study_id), ]
+X_effect <- X_effect %>%
+  group_by(study_id) %>%
+  mutate(obs = row_number())
+X_effect$obs <- as.factor(X_effect$obs)
+
+library(igraph)
+X_effect$membership <- NA
+walktrap <- graph_from_adjacency_matrix(X_shared_authors) |> cluster_walktrap()
+counts <- table(X_effect$study_id)
+X_effect$membership <- as.factor(rep(walktrap$membership, times = counts))
+```
+
+### 3.4.2. Null model
+
+```{r}
+#| label: moura_null_model
+#| eval: false
+X.rma.null <- rma.mv(yi, vi, random = list(~1|study_id/obs,
+                                           ~1|species.id,
+                                           ~1|species.id.phy),
+                     R = list(species.id.phy  = A),
+                     data = X_effect)
+save(X.rma.null, file = "moura.rma.null.Rdata")
+```
+
+### 3.4.3. Inv.geo model
+
+```{r}
+#| label: moura_invgeo_model
+#| eval: false
+X.rma.full.invgeo <- rma.mv(yi, vi, random = list(~1|study_id/obs,
+                                                  ~1|species.id,
+                                                  ~1|species.id.phy,
+                                                  ~1|study_id.phyl),
+                            R = list(species.id.phy  = A,
+                                     study_id.phyl = X_inv.geo),
+                            data = X_effect)
+save(X.rma.full.invgeo, file = "moura.rma.full.invgeo.Rdata")
+```
+
+### 3.4.4. Jaccard model
+
+```{r}
+#| label: moura_jaccard_model
+#| eval: false
+X.rma.full.jaccard <- rma.mv(yi, vi, random = list(~1|study_id/obs,
+                                                  ~1|species.id,
+                                                  ~1|species.id.phy,
+                                                  ~1|study_id.phyl),
+                            R = list(species.id.phy  = A,
+                                     study_id.phyl = X_jaccard_matrix),
+                            data = X_effect)
+save(X.rma.full.jaccard, file = "moura.rma.full.jaccard.Rdata")
+```
+
+### 3.4.5. Inv.geo jaccard model
+
+```{r}
+#| label: moura_invgeo_jaccard_model
+#| eval: false
+X.rma.full.invgeo_jaccard <- rma.mv(yi, vi, random = list(~1|study_id/obs,
+                                                  ~1|species.id,
+                                                  ~1|species.id.phy,
+                                                  ~1|study_id.phyl),
+                            R = list(species.id.phy  = A,
+                                     study_id.phyl = X_invgeo_jaccard),
+                            data = X_effect)
+save(X.rma.full.invgeo_jaccard, file = "moura.rma.full.invgeo_jaccard.Rdata")
+```
+
+### 3.4.6. Summary
+
+```{r}
+#| label: moura_rma_all
+load("moura.rma.null.Rdata")
+load("moura.rma.full.invgeo.Rdata")
+load("moura.rma.full.jaccard.Rdata")
+load("moura.rma.full.invgeo_jaccard.Rdata")
+summary(X.rma.null)
+summary(X.rma.full.invgeo)
+summary(X.rma.full.jaccard)
+summary(X.rma.full.invgeo_jaccard)
+```
+
+## 3.5. Plots
+
+### 3.5.1. Model comparison
+
+```{r}
+#| label: moura_model_comparison_plot
+mod_comp <- data.frame("model" = c("Null model", "Invgeo model",
+                                       "Jaccard model", "Invgeo jaccard model"),
+                       "beta" = c(X.rma.null$beta, X.rma.full.invgeo$beta,
+                                  X.rma.full.jaccard$beta,
+                                  X.rma.full.invgeo_jaccard$beta),
+                       "se" = c(X.rma.null$se, X.rma.full.invgeo$se,
+                                X.rma.full.jaccard$se,
+                                X.rma.full.invgeo_jaccard$se))
+
+forest(mod_comp$beta, vi = mod_comp$se^2, slab = mod_comp$model,
+       header = "Effect size and CI of the different models")
+```
+
+### 3.5.2. Adjusted effect sizes
+
+#### 3.5.2.1. Calculation
+
+```{r}
+#| label: moura_adjusted_effects
+#| warning: false
+############################ invgeo ##############################
+X_ranef_invgeo <- ranef(X.rma.full.invgeo)
+rep_vec <- X_effect %>% group_by(study_id) %>% filter(!is.na(yi)) %>% count()
+
+spec_effects <- data.frame("species.id" = X_effect$species.id)
+spec.id_ranef <- data.frame("species.id" = rownames(X_ranef_invgeo$species.id),
+                         "intersept" = X_ranef_invgeo$species.id$intrcpt,
+                         "se" = X_ranef_invgeo$species.id$se)
+spec_effects <- merge(spec_effects, spec.id_ranef, by = "species.id")
+
+spec.phyl_effects <- data.frame("species.id.phy" = X_effect$species.id.phy)
+spec.phy_ranef <- data.frame("species.id.phy" = rownames(X_ranef_invgeo$species.id.phy), "intersept" = X_ranef_invgeo$species.id.phy$intrcpt, "se" = X_ranef_invgeo$species.id.phy$se)
+spec.phyl_effects <- merge(spec.phyl_effects, spec.phy_ranef, by = "species.id.phy")
+
+adjusted_effects_invgeo <- X.rma.full.invgeo$beta +
+  rep(X_ranef_invgeo$study_id$intrcpt, rep_vec$n) + spec_effects$intersept +
+  X_ranef_invgeo$`study_id/obs`$intrcpt + spec.phyl_effects$intersept
+
+adjusted_effects_invgeo_se <- X.rma.full.invgeo$se +
+  rep(X_ranef_invgeo$study_id$se, rep_vec$n) + spec_effects$se +
+  X_ranef_invgeo$`study_id/obs`$se + spec.phyl_effects$se
+
+ad_effect_dist_mat_invgeo <- as.matrix(dist(adjusted_effects_invgeo))
+ad_effect_sim_mat_invgeo <- 1 - (ad_effect_dist_mat_invgeo/max(ad_effect_dist_mat_invgeo))
+
+ad_mantel_corlog_geodist <- ncf::mantel.correlog(X_geo_dist_mat_full, ad_effect_sim_mat_invgeo, increment = 1, resamp = 0)
+############################ jaccard ##############################
+X_ranef_jaccard <- ranef(X.rma.full.jaccard)
+
+spec_effects_jaccard <- data.frame("species.id" = X_effect$species.id)
+spec.id_ranef_jaccard <- data.frame("species.id" = rownames(X_ranef_jaccard$species.id),
+                         "intersept" = X_ranef_jaccard$species.id$intrcpt,
+                         "se" = X_ranef_jaccard$species.id$se)
+spec_effects_jaccard <- merge(spec_effects_jaccard, spec.id_ranef_jaccard, by = "species.id")
+
+spec.phyl_effects_jaccard <- data.frame("species.id.phy" = X_effect$species.id.phy)
+spec.phy_ranef_jaccard <- data.frame("species.id.phy" = rownames(X_ranef_jaccard$species.id.phy), "intersept" = X_ranef_jaccard$species.id.phy$intrcpt, "se" = X_ranef_jaccard$species.id.phy$se)
+spec.phyl_effects_jaccard <- merge(spec.phyl_effects_jaccard, spec.phy_ranef_jaccard, by = "species.id.phy")
+
+adjusted_effects_jaccard <- X.rma.full.jaccard$beta +
+  rep(X_ranef_jaccard$study_id$intrcpt, rep_vec$n) + spec_effects_jaccard$intersept +
+  X_ranef_jaccard$`study_id/obs`$intrcpt + spec.phyl_effects_jaccard$intersept
+
+adjusted_effects_jaccard_se <- X.rma.full.jaccard$se +
+  rep(X_ranef_jaccard$study_id$se, rep_vec$n) + spec_effects_jaccard$se +
+  X_ranef_jaccard$`study_id/obs`$se + spec.phyl_effects_jaccard$se
+
+ad_effect_dist_mat_jaccard <- as.matrix(dist(adjusted_effects_jaccard))
+ad_effect_sim_mat_jaccard <- 1 - (ad_effect_dist_mat_jaccard/max(ad_effect_dist_mat_jaccard))
+
+ad_mantel_corlog_jaccard <- ncf::mantel.correlog(X_jaccard_mat_full, ad_effect_sim_mat_jaccard, increment = .1, resamp = 0)
+```
+
+#### 3.5.2.2. Correlogram
+
+```{r}
+#| label: dinu_correlogram_adjusted
+#| fig.width: 12
+#| fig.height: 12
+#################### CIs for invgeo ###########################
+######## raw ##########
+corlog_CI_invgeo <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(X_mantel_corlog$correlation)){
+  corlog_CI_invgeo[i, 1] <- CIr(X_mantel_corlog$correlation[i], X_mantel_corlog$n[i])[1]
+  corlog_CI_invgeo[i, 2] <- CIr(X_mantel_corlog$correlation[i], X_mantel_corlog$n[i])[2]
+}
+######## adjusted #####
+corlog_CI_ad_invgeo <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(ad_mantel_corlog_geodist$correlation)){
+  corlog_CI_ad_invgeo[i, 1] <- CIr(ad_mantel_corlog_geodist$correlation[i], ad_mantel_corlog_geodist$n[i])[1]
+  corlog_CI_ad_invgeo[i, 2] <- CIr(ad_mantel_corlog_geodist$correlation[i], ad_mantel_corlog_geodist$n[i])[2]
+}
+#################### CIs for jaccard ###########################
+######## raw ##########
+corlog_CI_jaccard <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(X_mantel_corlog_jaccard$correlation)){
+  corlog_CI_jaccard[i, 1] <- CIr(X_mantel_corlog_jaccard$correlation[i], X_mantel_corlog_jaccard$n[i])[1]
+  corlog_CI_jaccard[i, 2] <- CIr(X_mantel_corlog_jaccard$correlation[i], X_mantel_corlog_jaccard$n[i])[2]
+}
+######## adjusted #####
+corlog_CI_ad_jaccard <- data.frame("low" = NA, "high" = NA)
+for(i in 1:length(ad_mantel_corlog_jaccard$correlation)){
+  corlog_CI_ad_jaccard[i, 1] <- CIr(ad_mantel_corlog_jaccard$correlation[i], ad_mantel_corlog_jaccard$n[i])[1]
+  corlog_CI_ad_jaccard[i, 2] <- CIr(ad_mantel_corlog_jaccard$correlation[i], ad_mantel_corlog_jaccard$n[i])[2]
+}
+################## plot ##########################################
+# combined plot:
+windowsFonts(A = windowsFont("Times New Roman"))
+par(mar = c(4,4,4,1), family = "A", cex = 2)
+plot(X_mantel_corlog$correlation, ylim = c(.5, 1), ylab = "Effect size similarity",
+                                     xlab = "Geodesic distance", main = "", cex = 0.5, las = 1, xaxt = "n")
+# raw invgeo:
+arrows(1, y0 = corlog_CI_invgeo[1, 1], y1 = corlog_CI_invgeo[1, 2], length = .05, angle = 90, code = 3)
+arrows(2, y0 = corlog_CI_invgeo[2, 1], y1 = corlog_CI_invgeo[2, 2], length = .05, angle = 90, code = 3)
+arrows(3, y0 = corlog_CI_invgeo[3, 1], y1 = corlog_CI_invgeo[3, 2], length = .05, angle = 90, code = 3)
+arrows(4, y0 = corlog_CI_invgeo[4, 1], y1 = corlog_CI_invgeo[4, 2], length = .05, angle = 90, code = 3)
+arrows(5, y0 = corlog_CI_invgeo[5, 1], y1 = corlog_CI_invgeo[5, 2], length = .05, angle = 90, code = 3)
+arrows(6, y0 = corlog_CI_invgeo[6, 1], y1 = corlog_CI_invgeo[6, 2], length = .05, angle = 90, code = 3)
+lines(1:5, X_mantel_corlog$correlation[1:5], lwd = 2)
+# adjusted invgeo:
+lines(1:5, ad_mantel_corlog_geodist$correlation[1:5], lwd = 2, lty = 2)
+points(1:6, ad_mantel_corlog_geodist$correlation, lty = 2, cex = .5)
+arrows(1, y0 = corlog_CI_ad_invgeo[1, 1], y1 = corlog_CI_ad_invgeo[1, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(2, y0 = corlog_CI_ad_invgeo[2, 1], y1 = corlog_CI_ad_invgeo[2, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(3, y0 = corlog_CI_ad_invgeo[3, 1], y1 = corlog_CI_ad_invgeo[3, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(4, y0 = corlog_CI_ad_invgeo[4, 1], y1 = corlog_CI_ad_invgeo[4, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(5, y0 = corlog_CI_ad_invgeo[5, 1], y1 = corlog_CI_ad_invgeo[5, 2], length = .05, angle = 90, code = 3, lty = 2)
+arrows(6, y0 = corlog_CI_ad_invgeo[6, 1], y1 = corlog_CI_ad_invgeo[6, 2], length = .05, angle = 90, code = 3, lty = 2)
+# raw jaccard
+lines(seq(1, 5, len = 8), rev(X_mantel_corlog_jaccard$correlation)[1:8], lwd = 2, col = "blue")
+points(seq(1, 5, len = 8), rev(X_mantel_corlog_jaccard$correlation)[1:8], col = "blue", cex = .5)
+points(6.05, X_mantel_corlog_jaccard$correlation[1], col = "blue", cex = .5)
+arrows(seq(1, 5, len = 8)[8], y0 = corlog_CI_jaccard[2, 1], y1 = corlog_CI_jaccard[2, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[7], y0 = corlog_CI_jaccard[3, 1], y1 = corlog_CI_jaccard[3, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[6], y0 = corlog_CI_jaccard[4, 1], y1 = corlog_CI_jaccard[4, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[5], y0 = corlog_CI_jaccard[5, 1], y1 = corlog_CI_jaccard[5, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[4], y0 = corlog_CI_jaccard[6, 1], y1 = corlog_CI_jaccard[6, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[3], y0 = corlog_CI_jaccard[7, 1], y1 = corlog_CI_jaccard[7, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[2], y0 = corlog_CI_jaccard[8, 1], y1 = corlog_CI_jaccard[8, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(seq(1, 5, len = 8)[1], y0 = corlog_CI_jaccard[9, 1], y1 = corlog_CI_jaccard[9, 2], length = .05, angle = 90, code = 3, col = "blue")
+arrows(6.05, y0 = corlog_CI_jaccard[1, 1], y1 = corlog_CI_jaccard[1, 2], length = .05, angle = 90, code = 3, col = "blue")
+# adjusted jaccard
+lines(seq(1, 5, len = 8), rev(ad_mantel_corlog_jaccard$correlation)[1:8], lty = 2, lwd = 2, col = "blue")
+points(seq(1, 5, len = 8), rev(ad_mantel_corlog_jaccard$correlation)[1:8], col = "blue", cex = .5)
+points(6.05, ad_mantel_corlog_jaccard$correlation[1], col = "blue", cex = .5)
+arrows(seq(1, 5, len = 8)[8], y0 = corlog_CI_ad_jaccard[2, 1], y1 = corlog_CI_ad_jaccard[2, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[7], y0 = corlog_CI_ad_jaccard[3, 1], y1 = corlog_CI_ad_jaccard[3, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[6], y0 = corlog_CI_ad_jaccard[4, 1], y1 = corlog_CI_ad_jaccard[4, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[5], y0 = corlog_CI_ad_jaccard[5, 1], y1 = corlog_CI_ad_jaccard[5, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[4], y0 = corlog_CI_ad_jaccard[6, 1], y1 = corlog_CI_ad_jaccard[6, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[3], y0 = corlog_CI_ad_jaccard[7, 1], y1 = corlog_CI_ad_jaccard[7, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[2], y0 = corlog_CI_ad_jaccard[8, 1], y1 = corlog_CI_ad_jaccard[8, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(seq(1, 5, len = 8)[1], y0 = corlog_CI_ad_jaccard[9, 1], y1 = corlog_CI_ad_jaccard[9, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+arrows(6.05, y0 = corlog_CI_ad_jaccard[1, 1], y1 = corlog_CI_ad_jaccard[1, 2], length = .05, angle = 90, code = 3, col = "blue", lty = 2)
+# rest:
+abline(v = 5.48)
+abline(v = 5.52)
+axis(side = 1, labels = c(0:4, Inf), at = 1:6)
+text(c(1,2,3,4,5,5.9), .5,
+     labels = c("n = 11,066", "n = 5799", "n = 508", "n = 327", "n = 27", "n = 1,652,151"), cex = .5)
+axis(side = 3, labels = round(rev(X_mantel_corlog_jaccard$mean.of.class),2), at = c(seq(1, 5, len = 8), 6))
+text(c(seq(1, 5, len = 8), 5.9), 1,
+     labels = c("n = 12,852", "n = 4", "n = 14", "n = 4", "n = 1816", "n = 916", "n = 265", "n = 994", "n = 1,653,013"),
+     cex = .5)
+mtext("Jaccard Similarity", side = 3, line = 2, cex = 2)
+legend(x = 1, y = .6, legend = c("raw effects (gdist.)", "adj. effects (gdist.)", "raw effects (jaccard)", "adj. effects (jaccard)"), bty = "n", lty = c(1, 2, 1, 2), ncol = 2, pch = 1, col = c("black", "black", "blue", "blue"))
+```
+
+#### 3.5.2.3. Forest plot
+
+```{r}
+#| label: moura_forest_plot
+#| fig.width: 12
+#| fig.height: 12
+set.seed(42)
+studies_to_plot <- sample(1:1828, 20, replace = F)
+par(mar = c(4,4,1,1), family = "A")
+forest(X.rma.full.invgeo$yi[studies_to_plot], vi = X.rma.full.invgeo$vi[studies_to_plot], ylim = c(-2.5, 23),
+       xlim = c(-3,4), header = T, slab = X$study.id[studies_to_plot])
+addpoly(adjusted_effects_invgeo[studies_to_plot], sei = adjusted_effects_invgeo_se[studies_to_plot], row = 1:20,
+        col = "gray", annotate = F, border = F)
+par(new = TRUE, family = "A")
+forest(X.rma.full.invgeo$yi[studies_to_plot], X.rma.full.invgeo$vi[studies_to_plot], xlim = c(-3, 4), ylim = c(-2.5, 23),
+       annotate = F, xlab = "", slab = NA)
+addpoly(X.rma.null, row = -1, mlab = "RE Model")
+addpoly(X.rma.full.invgeo, mlab = "RE Model (Adjusted Effect)")
+abline(h = 0)
+```
+
+#### 3.5.2.4. Phylogeny comparison
+
+```{r}
+#| label: moura_phylogeny_comparison
+#| fig.width: 12
+#| fig.height: 12
+par(mar = c(4,4,1,1), family = "A", las = 1, cex = 3)
+boxplot(X_ranef_invgeo$species.id.phy$intrcpt, X_ranef_invgeo$study_id.phyl$intrcpt,
+        names = c("Real phylogeny", "Co-authorship sim."), ylab = "BLUP", cex = 1/3)
+abline(h = 0, lty = 2)
+```
